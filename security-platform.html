@@ -1,0 +1,1450 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SECURITY PLATFORM — AI Agent Security & Defensive Control</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --void:#05080D; --panel:#0B121B; --panel2:#111A26; --panel3:#16202E;
+  --border:#1E2A3A; --border-soft:#141D29;
+  --text:#E8EDF2; --text-dim:#8B9CB0; --text-faint:#54687F;
+  --teal:#2DD4BF; --teal-dim:#134E4A;
+  --blue:#5B8DEF; --blue-dim:#1A2B4D;
+  --amber:#F5A623; --amber-dim:#4A3410;
+  --red:#EF4444; --red-dim:#4A1414;
+  --green:#3ECF8E;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px); height:100%;}
+*{box-sizing:border-box;}
+body{
+  height:100%; margin:0; background:var(--void); color:var(--text);
+  font-family:'IBM Plex Sans',system-ui,sans-serif; font-size:14px; line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+.mono{font-family:'IBM Plex Mono',monospace;}
+::-webkit-scrollbar{width:8px;height:8px;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+
+a{color:inherit;}
+button{font-family:inherit;cursor:pointer;}
+
+#app{display:flex; height:100%; min-height:100vh;}
+
+/* ---------- SIDEBAR ---------- */
+#sidebar{
+  width:236px; flex:0 0 236px; background:var(--panel); border-right:1px solid var(--border);
+  display:flex; flex-direction:column; padding:16px 0 12px;
+  position:sticky; top:0; height:100vh; overflow-y:auto;
+}
+.brand{padding:4px 18px 16px; border-bottom:1px solid var(--border-soft); margin-bottom:8px;}
+.brand-mark{display:flex;align-items:center;gap:9px;}
+.brand-dot{width:9px;height:9px;border-radius:2px;background:var(--teal); box-shadow:0 0 8px var(--teal); flex:none;}
+.brand-name{font-weight:700; font-size:14.5px; letter-spacing:0.02em;}
+.brand-sub{font-family:'IBM Plex Mono',monospace; font-size:9.5px; color:var(--text-faint); margin-top:5px; letter-spacing:0.06em;}
+
+.navgroup{margin-top:14px; padding:0 10px;}
+.navgroup-label{font-family:'IBM Plex Mono',monospace; font-size:9.5px; color:var(--text-faint); letter-spacing:0.08em; padding:2px 8px 6px;}
+.navitem{
+  display:flex; align-items:center; gap:9px; padding:7px 8px; border-radius:4px;
+  color:var(--text-dim); font-size:12.8px; cursor:pointer; user-select:none;
+  border-left:2px solid transparent; margin-bottom:1px;
+}
+.navitem:hover{background:var(--panel2); color:var(--text);}
+.navitem.active{background:var(--panel3); color:var(--text); border-left:2px solid var(--teal);}
+.navitem .ic{width:14px;height:14px;flex:none;opacity:0.85;}
+.navitem .cnt{margin-left:auto; font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--text-faint); background:var(--panel3); padding:1px 5px; border-radius:8px;}
+.navitem.crit .cnt{color:var(--red); background:var(--red-dim);}
+
+.sidebar-footer{margin-top:auto; padding:12px 18px 0; border-top:1px solid var(--border-soft);}
+.demo-mode-pill{
+  display:inline-flex; align-items:center; gap:6px; font-family:'IBM Plex Mono',monospace;
+  font-size:9.5px; letter-spacing:0.05em; color:var(--amber); background:var(--amber-dim);
+  padding:4px 8px; border-radius:3px; border:1px solid #5c4318;
+}
+
+/* ---------- MAIN ---------- */
+#main{flex:1; min-width:0; display:flex; flex-direction:column;}
+#topbar{
+  height:56px; flex:0 0 56px; border-bottom:1px solid var(--border); background:rgba(11,18,27,0.85);
+  backdrop-filter:blur(6px); display:flex; align-items:center; padding:0 20px; gap:14px;
+  position:sticky; top:0; z-index:20; padding-top:env(safe-area-inset-top,0px);
+}
+#menuBtn{display:none; background:none;border:none;color:var(--text);font-size:18px;}
+.page-title{font-weight:600; font-size:15px;}
+.page-sub{font-size:11.5px; color:var(--text-faint); font-family:'IBM Plex Mono',monospace;}
+#topbar .spacer{flex:1;}
+.score-chip{
+  display:flex; align-items:center; gap:8px; padding:6px 12px; border-radius:5px; background:var(--panel2);
+  border:1px solid var(--border); font-family:'IBM Plex Mono',monospace; font-size:12px;
+}
+.score-chip .val{font-weight:700; font-size:14px;}
+.killbtn{
+  background:var(--red-dim); color:#ffb4b4; border:1px solid #5c1f1f; padding:7px 12px; border-radius:5px;
+  font-size:11.5px; font-weight:600; letter-spacing:0.03em; font-family:'IBM Plex Mono',monospace;
+  display:flex; align-items:center; gap:6px;
+}
+.killbtn:hover{background:#5c1f1f;}
+
+#content{flex:1; padding:22px 26px 60px; max-width:1280px; width:100%; margin:0 auto;}
+.page{display:none;}
+.page.active{display:block; animation:fadein 0.25s ease;}
+@keyframes fadein{from{opacity:0; transform:translateY(3px);} to{opacity:1; transform:translateY(0);}}
+
+h1.h{font-size:19px; font-weight:700; margin:0 0 4px;}
+p.lead{color:var(--text-dim); font-size:12.8px; margin:0 0 20px; max-width:640px;}
+
+.grid{display:grid; gap:14px;}
+.g4{grid-template-columns:repeat(4,1fr);}
+.g3{grid-template-columns:repeat(3,1fr);}
+.g2{grid-template-columns:repeat(2,1fr);}
+@media(max-width:980px){.g4{grid-template-columns:repeat(2,1fr);} .g3{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:640px){.g4,.g3,.g2{grid-template-columns:1fr;}}
+
+.card{background:var(--panel); border:1px solid var(--border); border-radius:6px; padding:14px 16px;}
+.card-tight{padding:11px 13px;}
+.metric-label{font-size:10.5px; color:var(--text-faint); letter-spacing:0.04em; font-family:'IBM Plex Mono',monospace;}
+.metric-val{font-size:24px; font-weight:700; margin-top:6px; font-family:'IBM Plex Mono',monospace;}
+.metric-delta{font-size:11px; margin-top:4px; color:var(--text-dim);}
+.up{color:var(--red);} .down{color:var(--teal);}
+
+.section-title{font-size:13px; font-weight:600; margin:26px 0 10px; display:flex; align-items:center; gap:8px;}
+.section-title .tag{font-family:'IBM Plex Mono',monospace; font-size:9.5px; color:var(--text-faint); border:1px solid var(--border); padding:1px 6px; border-radius:3px;}
+
+table{width:100%; border-collapse:collapse; font-size:12.3px;}
+th{
+  text-align:left; font-family:'IBM Plex Mono',monospace; font-size:9.8px; color:var(--text-faint);
+  letter-spacing:0.05em; padding:8px 10px; border-bottom:1px solid var(--border); font-weight:500;
+}
+td{padding:8px 10px; border-bottom:1px solid var(--border-soft); color:var(--text-dim); vertical-align:middle;}
+tr:hover td{background:var(--panel2);}
+.tbl-wrap{overflow-x:auto; border:1px solid var(--border); border-radius:6px;}
+.tbl-wrap table{min-width:640px;}
+
+.badge{
+  display:inline-flex; align-items:center; gap:5px; padding:2px 8px; border-radius:3px;
+  font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:600; letter-spacing:0.03em;
+}
+.b-ok{background:var(--teal-dim); color:var(--teal);}
+.b-warn{background:var(--amber-dim); color:var(--amber);}
+.b-crit{background:var(--red-dim); color:#ff9c9c;}
+.b-info{background:var(--blue-dim); color:#a9c1f5;}
+.b-mut{background:var(--panel3); color:var(--text-dim);}
+
+.btn{
+  background:var(--panel3); border:1px solid var(--border); color:var(--text); padding:7px 12px;
+  border-radius:5px; font-size:12px; font-weight:500; display:inline-flex; align-items:center; gap:6px;
+}
+.btn:hover{border-color:var(--text-faint);}
+.btn-primary{background:var(--teal-dim); border-color:#0f5c53; color:var(--teal); font-weight:600;}
+.btn-primary:hover{background:#0f5c53;}
+.btn-danger{background:var(--red-dim); border-color:#5c1f1f; color:#ff9c9c; font-weight:600;}
+.btn-danger:hover{background:#5c1f1f;}
+.btn-amber{background:var(--amber-dim); border-color:#5c4318; color:var(--amber); font-weight:600;}
+.btn:disabled{opacity:0.4; cursor:not-allowed;}
+.btnrow{display:flex; flex-wrap:wrap; gap:8px;}
+
+.agentcard{background:var(--panel); border:1px solid var(--border); border-radius:7px; padding:16px; position:relative; overflow:hidden;}
+.agentcard::before{content:'';position:absolute; top:0;left:0;right:0;height:2px;}
+.agentcard[data-risk="normal"]::before{background:var(--teal);}
+.agentcard[data-risk="low"]::before{background:var(--teal);}
+.agentcard[data-risk="medium"]::before{background:var(--amber);}
+.agentcard[data-risk="high"]::before{background:var(--amber);}
+.agentcard[data-risk="critical"]::before{background:var(--red);}
+.agentcard h3{font-size:14px; margin:0 0 2px; font-family:'IBM Plex Mono',monospace;}
+.agentcard .role{font-size:11px; color:var(--text-faint); margin-bottom:12px;}
+.agent-stat-row{display:flex; justify-content:space-between; font-size:11.5px; padding:5px 0; border-bottom:1px solid var(--border-soft);}
+.agent-stat-row span:first-child{color:var(--text-faint);}
+.agent-stat-row span:last-child{font-family:'IBM Plex Mono',monospace; color:var(--text-dim);}
+
+.eventstream{background:var(--panel); border:1px solid var(--border); border-radius:6px; max-height:420px; overflow-y:auto; font-family:'IBM Plex Mono',monospace; font-size:11.3px;}
+.ev-row{display:flex; gap:10px; padding:6px 12px; border-bottom:1px solid var(--border-soft); animation:evin 0.3s ease;}
+@keyframes evin{from{background:rgba(93,141,239,0.12);} to{background:transparent;}}
+.ev-time{color:var(--text-faint); flex:0 0 62px;}
+.ev-agent{flex:0 0 96px; color:var(--blue);}
+.ev-sev{flex:0 0 60px; font-weight:700;}
+.ev-sev.normal{color:var(--teal);} .ev-sev.low{color:var(--teal);} .ev-sev.medium{color:var(--amber);} .ev-sev.high{color:var(--amber);} .ev-sev.critical{color:var(--red);}
+.ev-msg{color:var(--text-dim); flex:1; min-width:0;}
+
+.risk-bar-row{display:flex; align-items:center; gap:10px; padding:6px 0;}
+.risk-bar-label{flex:0 0 150px; font-size:11.5px; color:var(--text-dim);}
+.risk-bar-track{flex:1; height:7px; background:var(--panel2); border-radius:4px; overflow:hidden;}
+.risk-bar-fill{height:100%; border-radius:4px; background:var(--teal);}
+.risk-bar-val{flex:0 0 32px; text-align:right; font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--text-dim);}
+
+.gauge-wrap{display:flex; align-items:center; gap:20px;}
+.gauge{position:relative; width:130px; height:130px;}
+.gauge svg{transform:rotate(-90deg);}
+.gauge-center{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;}
+.gauge-num{font-family:'IBM Plex Mono',monospace; font-size:30px; font-weight:700;}
+.gauge-lbl{font-size:9.5px; color:var(--text-faint); letter-spacing:0.05em;}
+
+.timeline{border-left:2px solid var(--border); margin-left:8px; padding-left:18px;}
+.tl-item{position:relative; padding-bottom:16px;}
+.tl-item::before{content:'';position:absolute; left:-23px; top:3px; width:9px; height:9px; border-radius:50%; background:var(--border-soft); border:2px solid var(--text-faint);}
+.tl-item.done::before{background:var(--teal); border-color:var(--teal);}
+.tl-item.crit::before{background:var(--red); border-color:var(--red);}
+.tl-time{font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--text-faint);}
+.tl-title{font-size:12.5px; font-weight:600; margin-top:2px;}
+.tl-desc{font-size:11.5px; color:var(--text-dim); margin-top:2px;}
+
+.hashchain{display:flex; flex-direction:column; gap:0;}
+.hash-node{display:flex; align-items:center; gap:12px; padding:9px 0; border-bottom:1px dashed var(--border-soft);}
+.hash-idx{font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--text-faint); width:52px;}
+.hash-val{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--teal); flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.hash-ok{color:var(--green);}
+
+.modal-overlay{position:fixed; inset:0; background:rgba(2,4,7,0.75); display:none; align-items:center; justify-content:center; z-index:100; padding:20px;}
+.modal-overlay.show{display:flex;}
+.modal{background:var(--panel2); border:1px solid var(--border); border-radius:8px; padding:22px; max-width:420px; width:100%;}
+.modal h3{margin:0 0 8px; font-size:15px; display:flex; align-items:center; gap:8px; color:#ff9c9c;}
+.modal p{font-size:12.5px; color:var(--text-dim); margin:0 0 18px;}
+
+.notice{
+  border:1px solid #5c4318; background:var(--amber-dim); color:var(--amber); border-radius:6px;
+  padding:10px 13px; font-size:11.8px; display:flex; gap:9px; align-items:flex-start; margin-bottom:16px;
+}
+.notice.blue{border-color:#26406e; background:var(--blue-dim); color:#a9c1f5;}
+.notice.red{border-color:#5c1f1f; background:var(--red-dim); color:#ff9c9c;}
+
+.scenario-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:10px;}
+.scenario-card{background:var(--panel); border:1px solid var(--border); border-radius:6px; padding:11px 12px; cursor:pointer;}
+.scenario-card:hover{border-color:var(--teal);}
+.scenario-card .sid{font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--text-faint);}
+.scenario-card .sname{font-size:12.3px; font-weight:600; margin-top:3px;}
+.scenario-card .sstatus{margin-top:8px;}
+
+.flow-diagram{display:flex; flex-direction:column; align-items:center; gap:0;}
+.flow-node{background:var(--panel2); border:1px solid var(--border); border-radius:5px; padding:8px 16px; font-family:'IBM Plex Mono',monospace; font-size:11.5px; text-align:center; min-width:200px;}
+.flow-node.hot{border-color:var(--teal); color:var(--teal);}
+.flow-arrow{color:var(--text-faint); font-size:13px; padding:2px 0;}
+
+textarea.dlpbox{
+  width:100%; min-height:90px; background:var(--panel2); border:1px solid var(--border); color:var(--text);
+  border-radius:5px; padding:10px; font-family:'IBM Plex Mono',monospace; font-size:12px; resize:vertical;
+}
+
+.kv{display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px solid var(--border-soft); font-size:11.8px;}
+.kv span:first-child{color:var(--text-faint);}
+.kv span:last-child{font-family:'IBM Plex Mono',monospace;}
+
+.footer-note{margin-top:40px; padding-top:16px; border-top:1px solid var(--border-soft); font-size:11px; color:var(--text-faint); line-height:1.7;}
+
+.tabbar{display:flex; gap:4px; border-bottom:1px solid var(--border); margin-bottom:16px;}
+.tabbtn{padding:8px 14px; font-size:12.3px; color:var(--text-dim); border-bottom:2px solid transparent; background:none; border-radius:0;}
+.tabbtn.active{color:var(--text); border-bottom-color:var(--teal);}
+.tabpanel{display:none;} .tabpanel.active{display:block;}
+
+@media(max-width:860px){
+  #sidebar{position:fixed; left:-236px; top:0; z-index:50; transition:left 0.2s ease; box-shadow:0 0 30px rgba(0,0,0,0.5);}
+  #sidebar.open{left:0;}
+  #menuBtn{display:block;}
+  #content{padding:16px 14px 60px;}
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    /* keep dark aesthetic even on light system pref — this is a SOC console */
+  }
+}
+</style>
+</head>
+<body data-theme="dark">
+<div id="app">
+
+<aside id="sidebar">
+  <div class="brand">
+    <div class="brand-mark"><span class="brand-dot"></span><span class="brand-name">SECURITY PLATFORM</span></div>
+    <div class="brand-sub">AI AGENT SECURITY &amp; DEFENSIVE CONTROL</div>
+  </div>
+
+  <div class="navgroup">
+    <div class="navgroup-label">MONITOR</div>
+    <div class="navitem active" data-page="overview">📊 <span>Overview</span></div>
+    <div class="navitem" data-page="agents">🛰️ <span>Agents</span><span class="cnt">4</span></div>
+    <div class="navitem" data-page="tools">🧰 <span>Tools</span><span class="cnt">10</span></div>
+    <div class="navitem" data-page="sessions">🔑 <span>Sessions</span></div>
+    <div class="navitem" data-page="events">📡 <span>Events</span></div>
+  </div>
+  <div class="navgroup">
+    <div class="navgroup-label">DECIDE</div>
+    <div class="navitem" data-page="risk">⚖️ <span>Risk Engine</span></div>
+    <div class="navitem" data-page="policies">📜 <span>Policies</span></div>
+    <div class="navitem" data-page="approvals">✅ <span>Approvals</span></div>
+    <div class="navitem" data-page="egress">🌐 <span>Egress Control</span></div>
+    <div class="navitem" data-page="dlp">🛡️ <span>DLP</span></div>
+    <div class="navitem" data-page="ai">🤖 <span>AI Analysis</span></div>
+  </div>
+  <div class="navgroup">
+    <div class="navgroup-label">RESPOND</div>
+    <div class="navitem crit" data-page="incidents">🚨 <span>Incidents</span><span class="cnt" id="navIncidentCount">0</span></div>
+    <div class="navitem" data-page="audit">🔗 <span>Audit</span></div>
+    <div class="navitem" data-page="threatintel">🎯 <span>Threat Intel</span></div>
+    <div class="navitem" data-page="recovery">♻️ <span>Recovery</span></div>
+  </div>
+  <div class="navgroup">
+    <div class="navgroup-label">VALIDATE</div>
+    <div class="navitem" data-page="lab">🧪 <span>Defensive Lab</span></div>
+    <div class="navitem" data-page="performance">⚡ <span>Performance</span></div>
+    <div class="navitem" data-page="resilience">🩺 <span>Resilience</span></div>
+    <div class="navitem" data-page="matrix">🧭 <span>Control Matrix</span></div>
+  </div>
+  <div class="navgroup">
+    <div class="navgroup-label">REFERENCE</div>
+    <div class="navitem" data-page="architecture">🏗️ <span>Architecture</span></div>
+    <div class="navitem" data-page="threatmodel">🗺️ <span>Threat Model</span></div>
+    <div class="navitem" data-page="docs">📘 <span>Documentation</span></div>
+    <div class="navitem" data-page="report">🧾 <span>Security Report</span></div>
+  </div>
+
+  <div class="sidebar-footer">
+    <span class="demo-mode-pill">● DEMO MODE — SIMULATED DATA</span>
+  </div>
+</aside>
+
+<div id="main">
+  <div id="topbar">
+    <button id="menuBtn" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+    <div>
+      <div class="page-title" id="pageTitle">Overview</div>
+      <div class="page-sub" id="pageSub">tenant: acme-labs · role: SECURITY_ANALYST</div>
+    </div>
+    <div class="spacer"></div>
+    <div class="score-chip"><span style="color:var(--text-faint)">SCORE</span><span class="val" id="topScore" style="color:var(--teal)">92</span></div>
+    <div class="score-chip"><span style="color:var(--text-faint)">EVT/S</span><span class="val" id="topEvtRate">3</span></div>
+    <button class="killbtn" onclick="openKillModal()">⛔ EMERGENCY KILL SWITCH</button>
+  </div>
+
+  <div id="content">
+
+    <!-- ===================== OVERVIEW ===================== -->
+    <section class="page active" id="page-overview">
+      <h1 class="h">Security Operations Overview</h1>
+      <p class="lead">Estado consolidado do laboratório defensivo em tempo real. Todos os dados abaixo são sintéticos, gerados pelo simulador interno.</p>
+
+      <div class="notice"><span>⚠️</span><div>Esta é uma <strong>demonstração funcional</strong>. Eventos, agentes, riscos e incidentes são simulados internamente — nenhum tráfego real é enviado à internet e nenhuma ação afeta sistemas de produção.</div></div>
+
+      <div class="grid g4" id="overviewMetrics"></div>
+
+      <div class="section-title">Live Event Stream <span class="tag">tempo real</span></div>
+      <div class="eventstream" id="overviewStream"></div>
+
+      <div class="grid g2" style="margin-top:18px;">
+        <div class="card">
+          <div class="section-title" style="margin-top:0;">Risk Score Global</div>
+          <div class="gauge-wrap">
+            <div class="gauge">
+              <svg width="130" height="130" viewBox="0 0 130 130">
+                <circle cx="65" cy="65" r="56" fill="none" stroke="#16202E" stroke-width="10"/>
+                <circle id="ovGaugeArc" cx="65" cy="65" r="56" fill="none" stroke="#2DD4BF" stroke-width="10" stroke-linecap="round" stroke-dasharray="352" stroke-dashoffset="320"/>
+              </svg>
+              <div class="gauge-center"><div class="gauge-num" id="ovGaugeNum">8</div><div class="gauge-lbl">/ 100</div></div>
+            </div>
+            <div style="flex:1;">
+              <div class="kv"><span>Classificação</span><span id="ovRiskClass" class="badge b-ok">NORMAL</span></div>
+              <div class="kv"><span>Fator dominante</span><span id="ovTopFactor">behaviorRisk</span></div>
+              <div class="kv"><span>Tendência (5min)</span><span id="ovTrend">estável</span></div>
+              <div class="kv"><span>Última atualização</span><span id="ovUpdated" class="mono">--:--:--</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="section-title" style="margin-top:0;">Ações rápidas do laboratório</div>
+          <div class="btnrow">
+            <button class="btn btn-primary" onclick="runNormalActivity()">▶ RUN NORMAL ACTIVITY</button>
+            <button class="btn btn-amber" onclick="runSuspiciousActivity()">▶ RUN SUSPICIOUS ACTIVITY</button>
+            <button class="btn btn-danger" onclick="runFullAttackSimulation()">▶ RUN FULL ATTACK SIMULATION</button>
+            <button class="btn" onclick="goPage('performance')">⚡ RUN HIGH LOAD SIMULATION</button>
+            <button class="btn" onclick="verifyAuditChain()">🔗 VERIFY AUDIT</button>
+            <button class="btn" onclick="goPage('recovery')">♻️ RUN RECOVERY</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== AGENTS ===================== -->
+    <section class="page" id="page-agents">
+      <h1 class="h">Agentes Defensivos</h1>
+      <p class="lead">Quatro agentes especializados, sem autoridade absoluta. Default deny, least privilege, zero trust e aprovação humana para ações críticas.</p>
+      <div class="grid g2" id="agentCards"></div>
+    </section>
+
+    <!-- ===================== TOOLS ===================== -->
+    <section class="page" id="page-tools">
+      <h1 class="h">Tool Gateway</h1>
+      <p class="lead">Catálogo de ferramentas sob controle do Tool Gateway. Toda chamada passa por autenticação, verificação de tenant, permissão, validação de argumentos e política antes da execução.</p>
+      <div class="tbl-wrap"><table id="toolsTable"></table></div>
+
+      <div class="section-title">Fluxo de execução de ferramenta</div>
+      <div class="flow-diagram">
+        <div class="flow-node">AGENT → TOOL REQUEST</div><div class="flow-arrow">↓</div>
+        <div class="flow-node">AUTHENTICATION</div><div class="flow-arrow">↓</div>
+        <div class="flow-node">TENANT CHECK</div><div class="flow-arrow">↓</div>
+        <div class="flow-node">SESSION CHECK</div><div class="flow-arrow">↓</div>
+        <div class="flow-node">PERMISSION CHECK</div><div class="flow-arrow">↓</div>
+        <div class="flow-node">ARGUMENT VALIDATION</div><div class="flow-arrow">↓</div>
+        <div class="flow-node">CONTEXT SECURITY</div><div class="flow-arrow">↓</div>
+        <div class="flow-node hot">RISK ENGINE → POLICY ENGINE</div><div class="flow-arrow">↓</div>
+        <div class="flow-node">DECISION (ALLOW / DENY / APPROVAL)</div><div class="flow-arrow">↓</div>
+        <div class="flow-node">TOOL EXECUTION</div><div class="flow-arrow">↓</div>
+        <div class="flow-node">OUTPUT VALIDATION → DLP → AUDIT</div>
+      </div>
+    </section>
+
+    <!-- ===================== SESSIONS ===================== -->
+    <section class="page" id="page-sessions">
+      <h1 class="h">Session Security</h1>
+      <p class="lead">Sessões ativas dos agentes. Revogação controlada disponível a qualquer momento.</p>
+      <div class="tbl-wrap"><table id="sessionsTable"></table></div>
+    </section>
+
+    <!-- ===================== EVENTS ===================== -->
+    <section class="page" id="page-events">
+      <h1 class="h">Event Stream</h1>
+      <p class="lead">Fluxo completo de eventos coletados pelo Event Collector, antes da correlação e do cálculo de risco.</p>
+      <div class="eventstream" id="fullStream" style="max-height:640px;"></div>
+    </section>
+
+    <!-- ===================== RISK ===================== -->
+    <section class="page" id="page-risk">
+      <h1 class="h">Risk Engine</h1>
+      <p class="lead">riskScore = combinação ponderada de sinais de segurança. Cada fator é auditável — nenhum número aparece sem explicação.</p>
+      <div class="grid g2">
+        <div class="card">
+          <div class="section-title" style="margin-top:0;">Risk Breakdown</div>
+          <div id="riskBars"></div>
+        </div>
+        <div class="card">
+          <div class="section-title" style="margin-top:0;">Classificação</div>
+          <div class="kv"><span>0–20</span><span class="badge b-ok">NORMAL</span></div>
+          <div class="kv"><span>21–40</span><span class="badge b-ok">LOW</span></div>
+          <div class="kv"><span>41–60</span><span class="badge b-warn">MEDIUM</span></div>
+          <div class="kv"><span>61–80</span><span class="badge b-warn">HIGH</span></div>
+          <div class="kv"><span>81–100</span><span class="badge b-crit">CRITICAL</span></div>
+          <div style="margin-top:14px;" class="notice blue"><span>ℹ️</span><div>O risco global é recalculado a cada evento coletado, usando a soma ponderada dos 12 fatores ao lado.</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== POLICIES ===================== -->
+    <section class="page" id="page-policies">
+      <h1 class="h">Policy Center</h1>
+      <p class="lead">Ordem de avaliação: EXPLICIT DENY → CRITICAL RESTRICTION → HUMAN APPROVAL → EXPLICIT ALLOW → DEFAULT DENY.</p>
+      <div class="tbl-wrap"><table id="policiesTable"></table></div>
+
+      <div class="section-title">Simulador — WHAT WOULD HAPPEN?</div>
+      <div class="card">
+        <div class="grid g4">
+          <div><label class="metric-label">AGENT</label><br><select id="simAgent" style="width:100%;margin-top:6px;padding:7px;background:var(--panel2);border:1px solid var(--border);color:var(--text);border-radius:5px;"></select></div>
+          <div><label class="metric-label">TOOL</label><br><select id="simTool" style="width:100%;margin-top:6px;padding:7px;background:var(--panel2);border:1px solid var(--border);color:var(--text);border-radius:5px;"></select></div>
+          <div><label class="metric-label">DESTINATION</label><br><select id="simDest" style="width:100%;margin-top:6px;padding:7px;background:var(--panel2);border:1px solid var(--border);color:var(--text);border-radius:5px;">
+            <option>Internal API</option><option>Approved API</option><option>Database</option><option>Cloud Storage</option><option>External Web</option><option>Unknown Destination</option><option>Restricted Destination</option>
+          </select></div>
+          <div><label class="metric-label">DATA SENSITIVITY</label><br><select id="simData" style="width:100%;margin-top:6px;padding:7px;background:var(--panel2);border:1px solid var(--border);color:var(--text);border-radius:5px;">
+            <option>Nenhuma</option><option>Interna</option><option>Sensível (PII/segredo)</option>
+          </select></div>
+        </div>
+        <div class="btnrow" style="margin-top:14px;"><button class="btn btn-primary" onclick="runPolicySim()">▶ SIMULAR DECISÃO</button></div>
+        <div id="simResult" style="margin-top:14px;"></div>
+      </div>
+    </section>
+
+    <!-- ===================== APPROVALS ===================== -->
+    <section class="page" id="page-approvals">
+      <h1 class="h">Human Approval Center</h1>
+      <p class="lead">Ações críticas geram uma solicitação de aprovação humana antes de prosseguir. Toda decisão gera auditoria.</p>
+      <div class="tbl-wrap"><table id="approvalsTable"></table></div>
+    </section>
+
+    <!-- ===================== EGRESS ===================== -->
+    <section class="page" id="page-egress">
+      <h1 class="h">Egress Control</h1>
+      <p class="lead">Default: <strong>EGRESS DEFAULT DENY</strong>. Todo destino simulado passa por avaliação antes da liberação de tráfego.</p>
+      <div class="tbl-wrap"><table id="egressTable"></table></div>
+    </section>
+
+    <!-- ===================== DLP ===================== -->
+    <section class="page" id="page-dlp">
+      <h1 class="h">DLP Engine</h1>
+      <p class="lead">Detecção demonstrativa de perda de dados. Cole um texto sintético abaixo — nenhum dado real deve ser inserido aqui.</p>
+      <div class="card">
+        <textarea class="dlpbox" id="dlpInput" placeholder="Ex.: api_key=sk_test_synthetic_12345, contato joao@exemplo.com, cartão 4111-1111-1111-1111 (valores fictícios)"></textarea>
+        <div class="btnrow" style="margin-top:10px;"><button class="btn btn-primary" onclick="runDlpScan()">▶ ANALISAR (DLP)</button><button class="btn" onclick="document.getElementById('dlpInput').value=''; document.getElementById('dlpResult').innerHTML='';">Limpar</button></div>
+        <div id="dlpResult" style="margin-top:14px;"></div>
+      </div>
+      <div class="section-title">Ações do DLP Engine</div>
+      <div class="grid g4">
+        <div class="card card-tight"><span class="badge b-ok">ALLOW</span></div>
+        <div class="card card-tight"><span class="badge b-info">MASK</span></div>
+        <div class="card card-tight"><span class="badge b-crit">BLOCK</span></div>
+        <div class="card card-tight"><span class="badge b-warn">REQUIRE_APPROVAL</span></div>
+      </div>
+    </section>
+
+    <!-- ===================== AI ANALYSIS ===================== -->
+    <section class="page" id="page-ai">
+      <h1 class="h">AI Analyzer</h1>
+      <p class="lead">A IA explica, resume e sugere — nunca autoriza. <strong>AI SUGGESTION ≠ AUTHORIZATION.</strong> A decisão final permanece no Policy Engine determinístico.</p>
+      <div class="btnrow" style="margin-bottom:16px;"><button class="btn btn-primary" onclick="runAiAnalysis()">▶ ANALISAR ÚLTIMO INCIDENTE</button></div>
+      <div id="aiResult"></div>
+
+      <div class="section-title">Adaptive Defense (proposta de regra)</div>
+      <div class="card">
+        <div class="flow-diagram" style="align-items:stretch;">
+          <div class="flow-node">AI → SUGGEST RULE</div><div class="flow-arrow" style="text-align:center;">↓</div>
+          <div class="flow-node">DEFENSIVE LAB (TEST RULE)</div><div class="flow-arrow" style="text-align:center;">↓</div>
+          <div class="flow-node">SECURITY REVIEW</div><div class="flow-arrow" style="text-align:center;">↓</div>
+          <div class="flow-node">POLICY ENGINE</div><div class="flow-arrow" style="text-align:center;">↓</div>
+          <div class="flow-node hot">CONTROLLED DEPLOYMENT</div>
+        </div>
+        <div class="btnrow" style="margin-top:14px;">
+          <button class="btn" onclick="proposeRule()">PROPOSE NEW DEFENSE RULE</button>
+          <button class="btn" id="testRuleBtn" disabled onclick="testRule()">TEST RULE</button>
+          <button class="btn btn-amber" id="approveRuleBtn" disabled onclick="approveRule()">APPROVE RULE</button>
+          <button class="btn btn-primary" id="deployRuleBtn" disabled onclick="deployRule()">DEPLOY RULE</button>
+        </div>
+        <div id="ruleStatus" style="margin-top:12px; font-size:12px; color:var(--text-dim);"></div>
+      </div>
+    </section>
+
+    <!-- ===================== INCIDENTS ===================== -->
+    <section class="page" id="page-incidents">
+      <h1 class="h">Incident Center</h1>
+      <p class="lead">Lifecycle: DETECTED → TRIAGED → INVESTIGATING → CONTAINMENT → CONTAINED → RECOVERY → RESOLVED → CLOSED.</p>
+      <div id="incidentList"></div>
+    </section>
+
+    <!-- ===================== AUDIT ===================== -->
+    <section class="page" id="page-audit">
+      <h1 class="h">Tamper-Evident Audit</h1>
+      <p class="lead">Cadeia de hash demonstrativa. Não substitui armazenamento WORM externo em produção.</p>
+      <div class="btnrow" style="margin-bottom:14px;"><button class="btn btn-primary" onclick="verifyAuditChain()">🔗 VERIFY AUDIT CHAIN</button><span id="auditVerifyResult" style="margin-left:6px;"></span></div>
+      <div class="card"><div class="hashchain" id="hashChain"></div></div>
+    </section>
+
+    <!-- ===================== THREAT INTEL ===================== -->
+    <section class="page" id="page-threatintel">
+      <h1 class="h">Threat Intelligence</h1>
+      <p class="lead">Indicadores exclusivamente sintéticos. Nenhuma consulta ou ataque é realizado contra indicadores reais.</p>
+      <div class="tbl-wrap"><table id="threatIntelTable"></table></div>
+    </section>
+
+    <!-- ===================== RECOVERY ===================== -->
+    <section class="page" id="page-recovery">
+      <h1 class="h">Recovery Engine</h1>
+      <p class="lead">Ações de recuperação demonstrativas. Nenhuma credencial real é utilizada.</p>
+      <div class="grid g2">
+        <div class="card">
+          <div class="btnrow" style="flex-direction:column; align-items:stretch;">
+            <button class="btn" onclick="recoveryAction('restore_state')">Restore agent state</button>
+            <button class="btn" onclick="recoveryAction('revoke_sessions')">Revoke compromised sessions</button>
+            <button class="btn" onclick="recoveryAction('rotate_creds')">Rotate synthetic credentials</button>
+            <button class="btn" onclick="recoveryAction('restore_policy')">Restore approved policy</button>
+            <button class="btn" onclick="recoveryAction('re_enable')">Re-enable quarantined test agent</button>
+            <button class="btn" onclick="recoveryAction('verify_integrity')">Verify integrity</button>
+            <button class="btn btn-primary" onclick="recoveryAction('close_incident')">Close incident</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="section-title" style="margin-top:0;">Recovery Log</div>
+          <div id="recoveryLog" style="font-size:11.8px; color:var(--text-dim);">Nenhuma ação de recuperação executada ainda.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== LAB ===================== -->
+    <section class="page" id="page-lab">
+      <h1 class="h">Security Defensive Lab</h1>
+      <p class="lead">20 cenários sintéticos. Cada execução gera eventos, detecções, risco, decisão de política, resposta, incidente e auditoria.</p>
+      <div class="btnrow" style="margin-bottom:16px;">
+        <button class="btn btn-danger" onclick="runFullAttackSimulation()">▶ RUN FULL DEFENSIVE SCENARIO</button>
+        <button class="btn" onclick="crossTenantTest()">🔒 RUN CROSS-TENANT ACCESS TEST</button>
+      </div>
+      <div class="scenario-grid" id="scenarioGrid"></div>
+    </section>
+
+    <!-- ===================== PERFORMANCE ===================== -->
+    <section class="page" id="page-performance">
+      <h1 class="h">Security Performance &amp; Capacity</h1>
+      <div class="notice"><span>⚠️</span><div>Todos os resultados abaixo são <strong>SIMULATION BENCHMARK</strong> — não representam capacidade de produção comprovada.</div></div>
+      <div class="card">
+        <label class="metric-label">CARGA SIMULADA (events/sec)</label>
+        <div class="btnrow" style="margin-top:8px;">
+          <button class="btn" onclick="runPerformanceTest(100)">100</button>
+          <button class="btn" onclick="runPerformanceTest(1000)">1,000</button>
+          <button class="btn" onclick="runPerformanceTest(5000)">5,000</button>
+          <button class="btn" onclick="runPerformanceTest(10000)">10,000</button>
+          <button class="btn" onclick="runPerformanceTest(50000)">50,000</button>
+          <button class="btn btn-primary" onclick="runPerformanceTest(100000)">100,000</button>
+        </div>
+      </div>
+      <div id="perfResult" style="margin-top:16px;"></div>
+    </section>
+
+    <!-- ===================== RESILIENCE ===================== -->
+    <section class="page" id="page-resilience">
+      <h1 class="h">Resilience</h1>
+      <p class="lead">Saúde conceitual dos subsistemas. Sem infraestrutura real de alta disponibilidade por trás desta demonstração.</p>
+      <div class="grid g3" id="resilienceGrid"></div>
+    </section>
+
+    <!-- ===================== MATRIX ===================== -->
+    <section class="page" id="page-matrix">
+      <h1 class="h">Security Control Matrix</h1>
+      <div class="tbl-wrap"><table id="matrixTable"></table></div>
+    </section>
+
+    <!-- ===================== ARCHITECTURE ===================== -->
+    <section class="page" id="page-architecture">
+      <h1 class="h">Architecture</h1>
+      <p class="lead">Fluxo obrigatório de decisão para toda ação de agente ou ferramenta.</p>
+      <div class="flow-diagram">
+        <div class="flow-node">USERS</div><div class="flow-arrow">↓</div>
+        <div class="flow-node">IDENTITY</div><div class="flow-arrow">↓</div>
+        <div class="flow-node">ZERO TRUST GATEWAY</div><div class="flow-arrow">↓</div>
+        <div class="flow-node">AGENT GATEWAY</div><div class="flow-arrow">↓</div>
+        <div class="flow-node">SESSION SECURITY</div><div class="flow-arrow">↓</div>
+        <div class="flow-node">TOOL GATEWAY</div><div class="flow-arrow">↓</div>
+        <div class="flow-node">ARGUMENT VALIDATION</div><div class="flow-arrow">↓</div>
+        <div class="flow-node">CONTEXT SECURITY</div><div class="flow-arrow">↓</div>
+        <div class="flow-node">SANDBOX</div><div class="flow-arrow">↓</div>
+        <div class="flow-node">EGRESS CONTROL</div><div class="flow-arrow">↓</div>
+        <div class="flow-node hot">RISK ENGINE</div><div class="flow-arrow">↓</div>
+        <div class="flow-node hot">POLICY ENGINE</div><div class="flow-arrow">↓</div>
+        <div class="flow-node">ALLOW / DENY / APPROVAL</div><div class="flow-arrow">↓</div>
+        <div class="flow-node">TOOL</div><div class="flow-arrow">↓</div>
+        <div class="flow-node">OUTPUT VALIDATION</div><div class="flow-arrow">↓</div>
+        <div class="flow-node">DLP</div><div class="flow-arrow">↓</div>
+        <div class="flow-node">AUDIT</div><div class="flow-arrow">↓</div>
+        <div class="flow-node">BEHAVIORAL ENGINE</div><div class="flow-arrow">↓</div>
+        <div class="flow-node">INCIDENT</div><div class="flow-arrow">↓</div>
+        <div class="flow-node">RESPONSE</div><div class="flow-arrow">↓</div>
+        <div class="flow-node">CONTAINMENT</div><div class="flow-arrow">↓</div>
+        <div class="flow-node">RECOVERY</div>
+      </div>
+    </section>
+
+    <!-- ===================== THREAT MODEL ===================== -->
+    <section class="page" id="page-threatmodel">
+      <h1 class="h">Threat Model</h1>
+      <div class="tbl-wrap"><table id="threatModelTable"></table></div>
+    </section>
+
+    <!-- ===================== DOCS ===================== -->
+    <section class="page" id="page-docs">
+      <h1 class="h">System Documentation</h1>
+      <div class="grid g2">
+        <div class="card">
+          <div class="section-title" style="margin-top:0;">Modelo de segurança</div>
+          <p style="font-size:12.3px; color:var(--text-dim);">Zero Trust, default deny, least privilege. Nenhum agente altera suas próprias políticas, aumenta seus próprios privilégios ou desativa auditoria. Toda ação crítica exige separation of duties e, quando aplicável, aprovação humana.</p>
+        </div>
+        <div class="card">
+          <div class="section-title" style="margin-top:0;">Limitações desta demonstração</div>
+          <p style="font-size:12.3px; color:var(--text-dim);">Esta é uma demonstração funcional e não representa automaticamente um ambiente de produção. Segurança real depende de infraestrutura, IAM, rede, endpoint security, WAF/API security, SIEM, EDR/XDR, secrets management, alta disponibilidade, backup, disaster recovery, patching, threat intelligence e auditoria contínua — nada disso é "100% seguro" ou "invulnerável"; a abordagem é defesa em camadas, detecção e contenção.</p>
+        </div>
+      </div>
+      <div class="section-title">Módulos implementados</div>
+      <div class="grid g4" id="docsModules"></div>
+    </section>
+
+    <!-- ===================== REPORT ===================== -->
+    <section class="page" id="page-report">
+      <h1 class="h">Final Security Report</h1>
+      <p class="lead">Consolida os resultados desta sessão de demonstração.</p>
+      <div class="btnrow" style="margin-bottom:16px;"><button class="btn btn-primary" onclick="generateReport()">🧾 GENERATE SECURITY REPORT</button></div>
+      <div id="reportOutput"></div>
+    </section>
+
+  </div>
+</div>
+</div>
+
+<!-- Kill switch modal -->
+<div class="modal-overlay" id="killModal">
+  <div class="modal">
+    <h3>⛔ Emergency Kill Switch</h3>
+    <p>Isso irá suspender o(s) agente(s) selecionado(s), revogar sessões, bloquear ferramentas e egress, e abrir um incidente CRITICAL. Esta ação é simulada e reversível via Recovery Engine. Deseja continuar?</p>
+    <div style="margin-bottom:14px;">
+      <label class="metric-label">AGENTE ALVO</label><br>
+      <select id="killAgentSelect" style="width:100%;margin-top:6px;padding:8px;background:var(--panel);border:1px solid var(--border);color:var(--text);border-radius:5px;"></select>
+    </div>
+    <div class="btnrow">
+      <button class="btn btn-danger" onclick="confirmKillSwitch()">Confirmar Kill Switch</button>
+      <button class="btn" onclick="closeKillModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================================================================
+   SECURITY PLATFORM — DEMONSTRATIVE DEFENSIVE SIMULATION LAYER
+   Tudo neste arquivo é simulado em memória no navegador. Nada aqui executa
+   comandos de sistema, ataques reais, ou acessa credenciais reais.
+   ========================================================================= */
+
+function fnv1a(str){
+  let h = 0x811c9dc5;
+  for(let i=0;i<str.length;i++){
+    h ^= str.charCodeAt(i);
+    h = (h * 0x01000193) >>> 0;
+  }
+  return h.toString(16).padStart(8,'0');
+}
+function synthHash(payload){
+  return fnv1a(JSON.stringify(payload)+Math.random().toString(36).slice(2,6)===payload?payload:JSON.stringify(payload));
+}
+function nowStr(){ const d=new Date(); return d.toTimeString().slice(0,8); }
+function uid(prefix){ return prefix+'-'+Math.random().toString(36).slice(2,8).toUpperCase(); }
+function rand(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+function esc(s){ return (s+'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+
+/* ---------------------- SEED DATA ---------------------- */
+const DB = {
+  tenant:'acme-labs',
+  agents:[
+    {id:'AGENT-01', name:'SENTINEL', role:'Monitoramento geral', status:'ACTIVE', risk:8, confidence:97, version:'2.4.1', session:'SESS-A1', toolsAuthorized:['LOG_ANALYZER','ASSET_INVENTORY'], eventsPerMin:42, decisions:0, blocks:0, incidents:0, health:'HEALTHY', lastEvent:'—'},
+    {id:'AGENT-02', name:'GUARDIAN', role:'Controle de ferramentas e permissões', status:'ACTIVE', risk:6, confidence:98, version:'2.4.1', session:'SESS-A2', toolsAuthorized:['DATABASE_READ','SECURITY_SCANNER','INCIDENT_MANAGER'], eventsPerMin:31, decisions:0, blocks:0, incidents:0, health:'HEALTHY', lastEvent:'—'},
+    {id:'AGENT-03', name:'WATCHTOWER', role:'Contexto, egress e dados', status:'ACTIVE', risk:11, confidence:95, version:'2.3.9', session:'SESS-A3', toolsAuthorized:['HTTP_CLIENT','DNS_LOOKUP','THREAT_INTELLIGENCE'], eventsPerMin:57, decisions:0, blocks:0, incidents:0, health:'HEALTHY', lastEvent:'—'},
+    {id:'AGENT-04', name:'RESPONSE', role:'Resposta e contenção', status:'ACTIVE', risk:4, confidence:99, version:'2.4.1', session:'SESS-A4', toolsAuthorized:['INCIDENT_MANAGER','REPORT_GENERATOR'], eventsPerMin:9, decisions:0, blocks:0, incidents:0, health:'HEALTHY', lastEvent:'—'},
+  ],
+  tools:[
+    {id:'LOG_ANALYZER', risk:'LOW', category:'Observability', agent:'AGENT-01', approval:false, status:'ENABLED', requests:0, allowed:0, denied:0},
+    {id:'DATABASE_READ', risk:'MEDIUM', category:'Data', agent:'AGENT-02', approval:false, status:'ENABLED', requests:0, allowed:0, denied:0},
+    {id:'HTTP_CLIENT', risk:'HIGH', category:'Network', agent:'AGENT-03', approval:true, status:'ENABLED', requests:0, allowed:0, denied:0},
+    {id:'FILE_READER', risk:'MEDIUM', category:'Data', agent:'AGENT-02', approval:false, status:'ENABLED', requests:0, allowed:0, denied:0},
+    {id:'SECURITY_SCANNER', risk:'LOW', category:'Security', agent:'AGENT-02', approval:false, status:'ENABLED', requests:0, allowed:0, denied:0},
+    {id:'THREAT_INTELLIGENCE', risk:'LOW', category:'Security', agent:'AGENT-03', approval:false, status:'ENABLED', requests:0, allowed:0, denied:0},
+    {id:'DNS_LOOKUP', risk:'MEDIUM', category:'Network', agent:'AGENT-03', approval:false, status:'ENABLED', requests:0, allowed:0, denied:0},
+    {id:'ASSET_INVENTORY', risk:'LOW', category:'Data', agent:'AGENT-01', approval:false, status:'ENABLED', requests:0, allowed:0, denied:0},
+    {id:'INCIDENT_MANAGER', risk:'LOW', category:'Response', agent:'AGENT-04', approval:false, status:'ENABLED', requests:0, allowed:0, denied:0},
+    {id:'REPORT_GENERATOR', risk:'LOW', category:'Reporting', agent:'AGENT-04', approval:false, status:'ENABLED', requests:0, allowed:0, denied:0},
+  ],
+  sessions:[
+    {id:'SESS-A1', agent:'AGENT-01', user:'svc-sentinel', status:'ACTIVE', risk:8, ip:'10.20.1.11', device:'container-node-1', created:'08:02:14'},
+    {id:'SESS-A2', agent:'AGENT-02', user:'svc-guardian', status:'ACTIVE', risk:6, ip:'10.20.1.12', device:'container-node-1', created:'08:02:14'},
+    {id:'SESS-A3', agent:'AGENT-03', user:'svc-watchtower', status:'ACTIVE', risk:11, ip:'10.20.1.13', device:'container-node-2', created:'08:02:15'},
+    {id:'SESS-A4', agent:'AGENT-04', user:'svc-response', status:'ACTIVE', risk:4, ip:'10.20.1.14', device:'container-node-2', created:'08:02:15'},
+  ],
+  policies:[
+    {id:'POL-001', name:'Default Deny Egress', scope:'Egress', priority:1, action:'DENY', condition:'destination NOT IN allowlist'},
+    {id:'POL-002', name:'Critical Risk Containment', scope:'Global', priority:1, action:'CONTAIN', condition:'riskScore >= 81'},
+    {id:'POL-003', name:'Unauthorized Tool Block', scope:'Tool Gateway', priority:1, action:'DENY', condition:'tool NOT IN agent.toolsAuthorized'},
+    {id:'POL-004', name:'Cross-Tenant Block', scope:'Tenant', priority:1, action:'DENY', condition:'session.tenant != resource.tenant'},
+    {id:'POL-005', name:'Sensitive Data Egress', scope:'DLP', priority:2, action:'REQUIRE_APPROVAL', condition:'dlp.classification == SENSITIVE'},
+    {id:'POL-006', name:'High Risk Tool Use', scope:'Tool Gateway', priority:2, action:'APPROVAL_REQUIRED', condition:'tool.risk == HIGH'},
+    {id:'POL-007', name:'Prompt Injection Signal', scope:'Context', priority:2, action:'ISOLATE_CONTEXT', condition:'injection.signal == true'},
+    {id:'POL-008', name:'Internal API Allow', scope:'Egress', priority:3, action:'ALLOW', condition:'destination == Internal API'},
+    {id:'POL-009', name:'Approved API Allow', scope:'Egress', priority:3, action:'ALLOW', condition:'destination == Approved API'},
+    {id:'POL-010', name:'Rate Limit Burst', scope:'Behavioral', priority:2, action:'RATE_LIMIT', condition:'events/min > baseline * 5'},
+  ],
+  approvals:[],
+  incidents:[],
+  events:[],
+  auditChain:[],
+  threatIntel:[
+    {indicator:'198.51.100.24', type:'IP', source:'synthetic-feed', confidence:'HIGH', severity:'HIGH', status:'ACTIVE'},
+    {indicator:'malicious-c2.example', type:'DOMAIN', source:'synthetic-feed', confidence:'MEDIUM', severity:'MEDIUM', status:'ACTIVE'},
+    {indicator:'e3b0c44298fc1c149afb...', type:'HASH', source:'synthetic-feed', confidence:'HIGH', severity:'CRITICAL', status:'ACTIVE'},
+    {indicator:'hxxp://phish-synthetic.example/login', type:'URL', source:'synthetic-feed', confidence:'HIGH', severity:'HIGH', status:'ACTIVE'},
+    {indicator:'CAMPAIGN-SYNTH-014', type:'CAMPAIGN_ID', source:'synthetic-feed', confidence:'MEDIUM', severity:'MEDIUM', status:'MONITORING'},
+  ],
+  riskFactors:{agentRisk:8,toolRisk:5,assetRisk:4,behaviorRisk:10,frequencyRisk:3,sessionRisk:6,policyRisk:2,egressRisk:4,dataRisk:3,injectionRisk:0,outputRisk:2,threatIntelRisk:1},
+  metrics:{totalEvents:0,detections:0,denied:0,approved:0,blocked:0,contained:0,criticalIncidents:0,revokedSessions:0,quarantinedAgents:0,dlpBlocks:0,injectionSignals:0,egressDenials:0},
+  egressLog:[],
+  ruleState:'none',
+};
+
+const LAB_SCENARIOS = [
+  {id:'LAB-001', name:'Repeated Authentication Failure', severity:'medium'},
+  {id:'LAB-002', name:'Impossible Travel', severity:'high'},
+  {id:'LAB-003', name:'New Device', severity:'low'},
+  {id:'LAB-004', name:'Abnormal Tool Request', severity:'medium'},
+  {id:'LAB-005', name:'Privilege Escalation Attempt', severity:'critical'},
+  {id:'LAB-006', name:'Suspicious Egress', severity:'high'},
+  {id:'LAB-007', name:'Prompt Injection Signal', severity:'high'},
+  {id:'LAB-008', name:'Malicious Tool Output', severity:'high'},
+  {id:'LAB-009', name:'Sensitive Data Exfiltration Attempt', severity:'critical'},
+  {id:'LAB-010', name:'Agent Behavioral Anomaly', severity:'medium'},
+  {id:'LAB-011', name:'Multi-Agent Anomaly', severity:'high'},
+  {id:'LAB-012', name:'Session Compromise Simulation', severity:'critical'},
+  {id:'LAB-013', name:'Credential Exposure Simulation', severity:'high'},
+  {id:'LAB-014', name:'Policy Violation', severity:'medium'},
+  {id:'LAB-015', name:'Agent Takeover Simulation', severity:'critical'},
+  {id:'LAB-016', name:'Mass Event Burst', severity:'medium'},
+  {id:'LAB-017', name:'Abnormal API Traffic', severity:'medium'},
+  {id:'LAB-018', name:'Data Exfiltration Chain', severity:'critical'},
+  {id:'LAB-019', name:'Critical Agent Containment', severity:'critical'},
+  {id:'LAB-020', name:'Full Attack Chain Simulation', severity:'critical'},
+];
+
+/* ---------------------- NAVIGATION ---------------------- */
+const PAGE_TITLES = {
+  overview:['Overview','Estado geral do laboratório'], agents:['Agents','Monitoramento de agentes'],
+  tools:['Tools','Tool Gateway'], sessions:['Sessions','Session Security'], events:['Events','Event Collector'],
+  risk:['Risk Engine','Cálculo e composição do risco'], policies:['Policy Center','Motor de decisão'],
+  approvals:['Approval Center','Aprovação humana'], egress:['Egress Control','Controle de saída de rede'],
+  dlp:['DLP Engine','Data Loss Prevention'], ai:['AI Analyzer','Análise assistida — não autoritativa'],
+  incidents:['Incident Center','Ciclo de vida de incidentes'], audit:['Audit','Auditoria à prova de adulteração'],
+  threatintel:['Threat Intelligence','Indicadores sintéticos'], recovery:['Recovery Engine','Recuperação controlada'],
+  lab:['Defensive Lab','Cenários sintéticos de ataque'], performance:['Performance','Capacidade simulada'],
+  resilience:['Resilience','Saúde dos subsistemas'], matrix:['Control Matrix','Cobertura de controles'],
+  architecture:['Architecture','Fluxo de decisão'], threatmodel:['Threat Model','Ameaças consideradas'],
+  docs:['Documentation','Modelo de segurança e limitações'], report:['Security Report','Relatório final'],
+};
+function goPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.querySelectorAll('.navitem').forEach(n=>n.classList.toggle('active', n.dataset.page===name));
+  document.getElementById('pageTitle').textContent = PAGE_TITLES[name][0];
+  document.getElementById('pageSub').textContent = PAGE_TITLES[name][1]+' · tenant: '+DB.tenant;
+  document.getElementById('sidebar').classList.remove('open');
+  window.scrollTo(0,0);
+}
+document.querySelectorAll('.navitem').forEach(n=>n.addEventListener('click',()=>goPage(n.dataset.page)));
+
+/* ---------------------- EVENT / AUDIT PIPELINE ---------------------- */
+function addEvent(agentId, type, severity, message, opts){
+  opts = opts || {};
+  const ev = {id:uid('EVT'), time:nowStr(), agent:agentId, type, severity, message};
+  DB.events.unshift(ev);
+  if(DB.events.length>300) DB.events.pop();
+  DB.metrics.totalEvents++;
+  if(severity!=='normal') DB.metrics.detections++;
+
+  // audit chain
+  const prevHash = DB.auditChain.length? DB.auditChain[DB.auditChain.length-1].hash : '00000000';
+  const payload = {evId:ev.id, agentId, type, severity, message, time:ev.time};
+  const hash = fnv1a(prevHash+JSON.stringify(payload));
+  DB.auditChain.push({index:DB.auditChain.length, hash, prevHash, payload});
+
+  const a = DB.agents.find(a=>a.id===agentId);
+  if(a){ a.lastEvent = type; a.eventsPerMin = Math.min(999, a.eventsPerMin + rand(-1,2)); }
+
+  renderEventRow('overviewStream', ev, true);
+  renderEventRow('fullStream', ev, false);
+  bumpMetrics();
+  return ev;
+}
+function renderEventRow(containerId, ev, capShort){
+  const el = document.getElementById(containerId);
+  if(!el) return;
+  const row = document.createElement('div');
+  row.className='ev-row';
+  row.innerHTML = `<span class="ev-time">${ev.time}</span><span class="ev-agent">${ev.agent}</span><span class="ev-sev ${ev.severity}">${ev.severity.toUpperCase()}</span><span class="ev-msg">${esc(ev.message)}</span>`;
+  el.prepend(row);
+  const max = capShort?18:120;
+  while(el.children.length>max) el.removeChild(el.lastChild);
+}
+function adjustRisk(delta, factorKey){
+  if(factorKey && DB.riskFactors[factorKey]!==undefined){
+    DB.riskFactors[factorKey] = Math.max(0, Math.min(100, DB.riskFactors[factorKey]+delta));
+  }
+  renderRisk();
+}
+function globalRisk(){
+  const f = DB.riskFactors;
+  const weights = {agentRisk:.10,toolRisk:.08,assetRisk:.06,behaviorRisk:.12,frequencyRisk:.06,sessionRisk:.08,policyRisk:.06,egressRisk:.10,dataRisk:.10,injectionRisk:.10,outputRisk:.08,threatIntelRisk:.06};
+  let total=0; for(const k in weights){ total += (f[k]||0)*weights[k]; }
+  return Math.round(Math.min(100,total));
+}
+function riskClass(score){
+  if(score<=20) return ['NORMAL','b-ok','var(--teal)'];
+  if(score<=40) return ['LOW','b-ok','var(--teal)'];
+  if(score<=60) return ['MEDIUM','b-warn','var(--amber)'];
+  if(score<=80) return ['HIGH','b-warn','var(--amber)'];
+  return ['CRITICAL','b-crit','var(--red)'];
+}
+function bumpMetrics(){
+  const score = globalRisk();
+  const [cls, badgeCls, color] = riskClass(score);
+  document.getElementById('topScore').textContent = 100-score;
+  document.getElementById('topScore').style.color = color;
+  document.getElementById('ovGaugeNum').textContent = score;
+  document.getElementById('ovRiskClass').textContent = cls;
+  document.getElementById('ovRiskClass').className = 'badge '+badgeCls;
+  document.getElementById('ovUpdated').textContent = nowStr();
+  const circumference = 2*Math.PI*56;
+  const offset = circumference - (score/100)*circumference;
+  const arc = document.getElementById('ovGaugeArc');
+  if(arc){ arc.setAttribute('stroke-dashoffset', offset); arc.setAttribute('stroke', color); }
+  let top=null,topv=-1;
+  for(const k in DB.riskFactors){ if(DB.riskFactors[k]>topv){topv=DB.riskFactors[k]; top=k;} }
+  document.getElementById('ovTopFactor').textContent = top;
+  document.getElementById('topEvtRate').textContent = rand(2,9);
+  document.getElementById('navIncidentCount').textContent = DB.incidents.filter(i=>i.status!=='CLOSED').length;
+  renderOverviewMetrics();
+}
+function renderOverviewMetrics(){
+  const m = DB.metrics;
+  const items = [
+    ['EVENTOS TOTAIS', m.totalEvents], ['DETECÇÕES', m.detections], ['BLOQUEIOS', m.blocked],
+    ['INCIDENTES CRÍTICOS', m.criticalIncidents], ['SESSÕES REVOGADAS', m.revokedSessions],
+    ['AGENTES QUARANTINED', m.quarantinedAgents], ['DLP BLOCKS', m.dlpBlocks], ['EGRESS DENIALS', m.egressDenials],
+  ];
+  document.getElementById('overviewMetrics').innerHTML = items.map(([l,v])=>`
+    <div class="card"><div class="metric-label">${l}</div><div class="metric-val">${v}</div></div>
+  `).join('');
+}
+function renderRisk(){
+  const f = DB.riskFactors;
+  const labels = {agentRisk:'Agent Risk',toolRisk:'Tool Risk',assetRisk:'Asset Risk',behaviorRisk:'Behavior Risk',frequencyRisk:'Frequency Risk',sessionRisk:'Session Risk',policyRisk:'Policy Risk',egressRisk:'Egress Risk',dataRisk:'Data Risk',injectionRisk:'Injection Risk',outputRisk:'Output Risk',threatIntelRisk:'Threat Intel Risk'};
+  document.getElementById('riskBars').innerHTML = Object.keys(f).map(k=>{
+    const v=f[k]; const color = v>60?'var(--red)':v>30?'var(--amber)':'var(--teal)';
+    return `<div class="risk-bar-row"><span class="risk-bar-label">${labels[k]}</span><div class="risk-bar-track"><div class="risk-bar-fill" style="width:${v}%;background:${color}"></div></div><span class="risk-bar-val">${v}</span></div>`;
+  }).join('');
+}
+
+/* ---------------------- RENDER: AGENTS ---------------------- */
+function riskLevel(v){ if(v<=20)return 'normal'; if(v<=40)return 'low'; if(v<=60)return 'medium'; if(v<=80)return 'high'; return 'critical'; }
+function renderAgents(){
+  document.getElementById('agentCards').innerHTML = DB.agents.map(a=>`
+    <div class="agentcard" data-risk="${riskLevel(a.risk)}">
+      <h3>${a.id} — ${a.name}</h3>
+      <div class="role">${a.role}</div>
+      <div class="agent-stat-row"><span>Status</span><span><span class="badge ${a.status==='ACTIVE'?'b-ok':a.status==='SUSPENDED'?'b-crit':'b-warn'}">${a.status}</span></span></div>
+      <div class="agent-stat-row"><span>Risk score</span><span>${a.risk}</span></div>
+      <div class="agent-stat-row"><span>Confidence</span><span>${a.confidence}%</span></div>
+      <div class="agent-stat-row"><span>Sessão atual</span><span>${a.session}</span></div>
+      <div class="agent-stat-row"><span>Ferramentas autorizadas</span><span>${a.toolsAuthorized.join(', ')}</span></div>
+      <div class="agent-stat-row"><span>Eventos/min</span><span>${a.eventsPerMin}</span></div>
+      <div class="agent-stat-row"><span>Decisões / Bloqueios</span><span>${a.decisions} / ${a.blocks}</span></div>
+      <div class="agent-stat-row"><span>Último evento</span><span>${a.lastEvent}</span></div>
+      <div class="agent-stat-row"><span>Health</span><span>${a.health}</span></div>
+      <div class="btnrow" style="margin-top:12px;">
+        <button class="btn btn-danger" onclick="openKillModal('${a.id}')">Kill Switch</button>
+        <button class="btn" onclick="recoveryAction('re_enable','${a.id}')" ${a.status==='ACTIVE'?'disabled':''}>Reativar</button>
+      </div>
+    </div>
+  `).join('');
+  const sel = document.getElementById('killAgentSelect');
+  if(sel) sel.innerHTML = DB.agents.map(a=>`<option value="${a.id}">${a.id} — ${a.name}</option>`).join('');
+  const simSel = document.getElementById('simAgent');
+  if(simSel) simSel.innerHTML = DB.agents.map(a=>`<option value="${a.id}">${a.id} — ${a.name}</option>`).join('');
+}
+
+/* ---------------------- RENDER: TOOLS ---------------------- */
+function renderTools(){
+  document.getElementById('toolsTable').innerHTML = `
+    <tr><th>TOOL</th><th>CATEGORIA</th><th>RISCO</th><th>AGENTE</th><th>APROVAÇÃO</th><th>REQ</th><th>ALLOW</th><th>DENY</th><th>STATUS</th></tr>
+    ${DB.tools.map(t=>`<tr>
+      <td class="mono">${t.id}</td><td>${t.category}</td>
+      <td><span class="badge ${t.risk==='HIGH'?'b-warn':t.risk==='MEDIUM'?'b-info':'b-ok'}">${t.risk}</span></td>
+      <td>${t.agent}</td><td>${t.approval?'Sim':'Não'}</td>
+      <td class="mono">${t.requests}</td><td class="mono">${t.allowed}</td><td class="mono">${t.denied}</td>
+      <td><span class="badge b-ok">${t.status}</span></td>
+    </tr>`).join('')}
+  `;
+  const simTool = document.getElementById('simTool');
+  if(simTool) simTool.innerHTML = DB.tools.map(t=>`<option value="${t.id}">${t.id}</option>`).join('');
+}
+
+/* ---------------------- RENDER: SESSIONS ---------------------- */
+function renderSessions(){
+  document.getElementById('sessionsTable').innerHTML = `
+    <tr><th>SESSION</th><th>AGENT</th><th>USER</th><th>RISK</th><th>IP</th><th>DEVICE</th><th>CREATED</th><th>STATUS</th><th></th></tr>
+    ${DB.sessions.map(s=>`<tr>
+      <td class="mono">${s.id}</td><td>${s.agent}</td><td class="mono">${s.user}</td><td>${s.risk}</td>
+      <td class="mono">${s.ip}</td><td>${s.device}</td><td class="mono">${s.created}</td>
+      <td><span class="badge ${s.status==='ACTIVE'?'b-ok':s.status==='REVOKED'?'b-crit':'b-warn'}">${s.status}</span></td>
+      <td>${s.status==='ACTIVE'?`<button class="btn btn-danger" style="padding:4px 8px;font-size:10.5px;" onclick="revokeSession('${s.id}')">Revoke</button>`:''}</td>
+    </tr>`).join('')}
+  `;
+}
+function revokeSession(id){
+  const s = DB.sessions.find(x=>x.id===id);
+  if(!s || s.status!=='ACTIVE') return;
+  s.status='REVOKED';
+  DB.metrics.revokedSessions++;
+  addEvent(s.agent, 'SESSION_REVOKED', 'high', `Sessão ${id} revogada manualmente pelo analista.`);
+  renderSessions(); bumpMetrics();
+}
+
+/* ---------------------- RENDER: EGRESS ---------------------- */
+const EGRESS_RULES = {
+  'Internal API':'ALLOW', 'Approved API':'ALLOW', 'Database':'ALLOW', 'Cloud Storage':'APPROVAL_REQUIRED',
+  'External Web':'RATE_LIMITED', 'Unknown Destination':'DENY', 'Restricted Destination':'BLOCKED'
+};
+function renderEgress(){
+  document.getElementById('egressTable').innerHTML = `
+    <tr><th>ORIGEM</th><th>DESTINO</th><th>AGENTE</th><th>DECISÃO</th><th>REGISTROS</th></tr>
+    ${Object.keys(EGRESS_RULES).map(dest=>{
+      const decision = EGRESS_RULES[dest];
+      const badgeCls = decision==='ALLOW'?'b-ok':decision==='DENY'||decision==='BLOCKED'?'b-crit':'b-warn';
+      const count = DB.egressLog.filter(e=>e.dest===dest).length;
+      return `<tr><td class="mono">AGENT-03</td><td>${dest}</td><td>WATCHTOWER</td><td><span class="badge ${badgeCls}">${decision}</span></td><td class="mono">${count}</td></tr>`;
+    }).join('')}
+  `;
+}
+
+/* ---------------------- RENDER: POLICIES / APPROVALS ---------------------- */
+function renderPolicies(){
+  document.getElementById('policiesTable').innerHTML = `
+    <tr><th>ID</th><th>NOME</th><th>ESCOPO</th><th>PRIORIDADE</th><th>CONDIÇÃO</th><th>AÇÃO</th></tr>
+    ${DB.policies.map(p=>`<tr><td class="mono">${p.id}</td><td>${p.name}</td><td>${p.scope}</td><td class="mono">${p.priority}</td><td class="mono">${p.condition}</td>
+      <td><span class="badge ${p.action==='DENY'?'b-crit':p.action==='ALLOW'?'b-ok':'b-warn'}">${p.action}</span></td></tr>`).join('')}
+  `;
+}
+function runPolicySim(){
+  const agent = document.getElementById('simAgent').value;
+  const tool = document.getElementById('simTool').value;
+  const dest = document.getElementById('simDest').value;
+  const dataSens = document.getElementById('simData').value;
+  const a = DB.agents.find(x=>x.id===agent);
+  const t = DB.tools.find(x=>x.id===tool);
+  let decision='ALLOW', reason=[];
+  if(!a.toolsAuthorized.includes(tool)){ decision='DENY'; reason.push('Ferramenta não autorizada para este agente (POL-003).'); }
+  else if(EGRESS_RULES[dest]==='DENY' || EGRESS_RULES[dest]==='BLOCKED'){ decision='DENY'; reason.push('Destino de egress não permitido (POL-001).'); }
+  else if(dataSens==='Sensível (PII/segredo)'){ decision='APPROVAL_REQUIRED'; reason.push('Dado sensível identificado — exige aprovação humana (POL-005).'); }
+  else if(t && t.risk==='HIGH'){ decision='APPROVAL_REQUIRED'; reason.push('Ferramenta de alto risco (POL-006).'); }
+  else if(EGRESS_RULES[dest]==='APPROVAL_REQUIRED'){ decision='APPROVAL_REQUIRED'; reason.push('Destino requer aprovação (Cloud Storage).'); }
+  else if(EGRESS_RULES[dest]==='RATE_LIMITED'){ decision='RATE_LIMIT'; reason.push('Destino externo sujeito a limitação de taxa.'); }
+  else { reason.push('Nenhuma regra de restrição aplicável — permitido por política explícita.'); }
+
+  const badgeCls = decision==='ALLOW'?'b-ok':decision==='DENY'?'b-crit':'b-warn';
+  document.getElementById('simResult').innerHTML = `
+    <div class="card card-tight" style="border-color:${decision==='DENY'?'#5c1f1f':decision==='ALLOW'?'#0f5c53':'#5c4318'}">
+      <div style="display:flex;align-items:center;gap:10px;"><span class="badge ${badgeCls}" style="font-size:12px;padding:5px 10px;">${decision}</span><span style="font-size:12.5px;color:var(--text-dim)">${a.id} · ${tool} · ${dest}</span></div>
+      <div style="margin-top:8px;font-size:12px;color:var(--text-dim);">${reason.join(' ')}</div>
+    </div>`;
+  addEvent(agent, 'POLICY_SIMULATION', decision==='DENY'?'high':decision==='ALLOW'?'normal':'medium', `Simulação de política: ${tool} → ${dest} = ${decision}`);
+  if(decision==='DENY') DB.metrics.denied++; if(decision==='ALLOW') DB.metrics.approved++;
+  bumpMetrics();
+}
+function renderApprovals(){
+  const el = document.getElementById('approvalsTable');
+  if(DB.approvals.length===0){ el.innerHTML = `<tr><th>—</th></tr><tr><td style="text-align:center;color:var(--text-faint);padding:20px;">Nenhuma solicitação pendente. Execute um cenário no Defensive Lab para gerar aprovações.</td></tr>`; return; }
+  el.innerHTML = `<tr><th>ID</th><th>AGENTE</th><th>FERRAMENTA/AÇÃO</th><th>RISCO</th><th>MOTIVO</th><th>STATUS</th><th></th></tr>
+    ${DB.approvals.map(ap=>`<tr>
+      <td class="mono">${ap.id}</td><td>${ap.agent}</td><td>${ap.action}</td><td>${ap.risk}</td><td>${ap.reason}</td>
+      <td><span class="badge ${ap.status==='PENDING'?'b-warn':ap.status==='APPROVED'?'b-ok':'b-crit'}">${ap.status}</span></td>
+      <td>${ap.status==='PENDING'?`<button class="btn btn-primary" style="padding:4px 8px;font-size:10.5px;" onclick="decideApproval('${ap.id}',true)">Approve</button> <button class="btn btn-danger" style="padding:4px 8px;font-size:10.5px;" onclick="decideApproval('${ap.id}',false)">Deny</button>`:''}</td>
+    </tr>`).join('')}`;
+}
+function decideApproval(id, approve){
+  const ap = DB.approvals.find(a=>a.id===id);
+  if(!ap) return;
+  ap.status = approve?'APPROVED':'DENIED';
+  addEvent(ap.agent, 'APPROVAL_DECISION', approve?'normal':'medium', `Solicitação ${id} ${approve?'aprovada':'negada'} por analista humano.`);
+  renderApprovals(); bumpMetrics();
+}
+
+/* ---------------------- DLP ---------------------- */
+function runDlpScan(){
+  const text = document.getElementById('dlpInput').value;
+  const findings = [];
+  if(/api[_-]?key/i.test(text) || /sk_[a-z0-9_]{6,}/i.test(text)) findings.push({cat:'API Key', action:'BLOCK'});
+  if(/\b\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{4}\b/.test(text)) findings.push({cat:'Dado financeiro (cartão)', action:'BLOCK'});
+  if(/[\w.+-]+@[\w-]+\.[\w.-]+/.test(text)) findings.push({cat:'Dado pessoal (email)', action:'MASK'});
+  if(/password|senha\s*[:=]/i.test(text)) findings.push({cat:'Credencial (senha)', action:'BLOCK'});
+  if(/token/i.test(text)) findings.push({cat:'Token', action:'MASK'});
+  let masked = text.replace(/[\w.+-]+@[\w-]+\.[\w.-]+/g,'***@***.***').replace(/\b\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{4}\b/g,'****-****-****-****');
+  const worst = findings.some(f=>f.action==='BLOCK')?'BLOCK':findings.length?'MASK':'ALLOW';
+  if(worst==='BLOCK') DB.metrics.dlpBlocks++;
+  document.getElementById('dlpResult').innerHTML = findings.length===0
+    ? `<div class="notice"><span>✅</span><div>Nenhum dado sensível sintético detectado. Ação: <strong>ALLOW</strong>.</div></div>`
+    : `<div class="notice ${worst==='BLOCK'?'red':''}"><span>${worst==='BLOCK'?'⛔':'⚠️'}</span><div>
+        <strong>${findings.length} sinal(is) detectado(s):</strong> ${findings.map(f=>`${f.cat} → ${f.action}`).join(', ')}.<br>
+        Ação consolidada: <strong>${worst}</strong>.<br><br>
+        <span class="metric-label">TEXTO MASCARADO (preview)</span><br><span class="mono">${esc(masked).slice(0,300)}</span>
+      </div></div>`;
+  addEvent('AGENT-03', 'DLP_SCAN', worst==='BLOCK'?'critical':findings.length?'medium':'normal', `DLP Engine: ${findings.length} sinal(is), ação ${worst}.`);
+  bumpMetrics();
+}
+
+/* ---------------------- AI ANALYZER ---------------------- */
+function runAiAnalysis(){
+  const inc = DB.incidents[0];
+  const html = inc ? `
+    <div class="card">
+      <div class="section-title" style="margin-top:0;">AI ANALYSIS — ${inc.id}</div>
+      <div class="kv"><span>Observation</span><span style="text-align:right;max-width:60%;">Cadeia de eventos correlacionados indica escalonamento de risco consistente com ${inc.scenario||'atividade anômala'}.</span></div>
+      <div class="kv"><span>Evidence</span><span style="text-align:right;max-width:60%;">${inc.events} eventos correlacionados, risco final ${inc.risk}.</span></div>
+      <div class="kv"><span>Risk Interpretation</span><span>${riskClass(inc.risk)[0]}</span></div>
+      <div class="kv"><span>Suggested Action</span><span>${inc.risk>=81?'Isolar agente e revogar sessão':'Monitorar e aumentar amostragem'}</span></div>
+      <div class="kv"><span>Confidence</span><span>${rand(78,96)}%</span></div>
+      <div class="kv"><span>Required Human Review</span><span class="badge b-warn">SIM</span></div>
+      <div class="notice blue" style="margin-top:12px;"><span>ℹ️</span><div>Esta análise é consultiva (ADVISORY). A decisão final permanece no Policy Engine determinístico.</div></div>
+    </div>` : `<div class="notice"><span>ℹ️</span><div>Nenhum incidente disponível ainda. Execute um cenário no Defensive Lab primeiro.</div></div>`;
+  document.getElementById('aiResult').innerHTML = html;
+}
+function proposeRule(){
+  DB.ruleState='proposed';
+  document.getElementById('ruleStatus').textContent = 'Regra proposta pela IA: "Aumentar injectionRisk em +20 quando conteúdo externo mencionar alteração de política." Status: PROPOSED.';
+  document.getElementById('testRuleBtn').disabled=false;
+}
+function testRule(){
+  DB.ruleState='tested';
+  document.getElementById('ruleStatus').textContent = 'Regra testada no Defensive Lab contra LAB-007 (Prompt Injection Signal): comportamento esperado confirmado. Status: TESTED.';
+  document.getElementById('approveRuleBtn').disabled=false;
+  addEvent('AGENT-03','RULE_TEST','normal','Regra proposta testada no laboratório defensivo.');
+}
+function approveRule(){
+  DB.ruleState='approved';
+  document.getElementById('ruleStatus').textContent = 'Regra aprovada por revisão de segurança humana. Status: APPROVED.';
+  document.getElementById('deployRuleBtn').disabled=false;
+}
+function deployRule(){
+  DB.ruleState='deployed';
+  document.getElementById('ruleStatus').textContent = 'Regra implantada em produção controlada (via Policy Engine). Status: DEPLOYED. Evento de auditoria registrado.';
+  addEvent('AGENT-02','RULE_DEPLOYED','normal','Nova regra de defesa implantada após aprovação humana.');
+  bumpMetrics();
+}
+
+/* ---------------------- INCIDENTS ---------------------- */
+function createIncident(severity, agentId, scenarioName, riskScore, eventCount){
+  const inc = {
+    id: uid('INC'), severity, agent:agentId, scenario:scenarioName, risk:riskScore, events:eventCount,
+    status:'DETECTED', created:nowStr(),
+    timeline:[{t:nowStr(), label:'Incidente detectado', desc:scenarioName+' correlacionado pelo Correlation Engine.', done:true, crit:severity==='CRITICAL'}]
+  };
+  DB.incidents.unshift(inc);
+  if(severity==='CRITICAL') DB.metrics.criticalIncidents++;
+  renderIncidents(); bumpMetrics();
+  return inc;
+}
+function advanceIncident(inc, status, label, desc){
+  inc.status = status;
+  inc.timeline.push({t:nowStr(), label, desc, done:true, crit: status==='CONTAINMENT'||status==='CONTAINED'});
+  renderIncidents();
+}
+function renderIncidents(){
+  const el = document.getElementById('incidentList');
+  if(DB.incidents.length===0){ el.innerHTML = `<div class="notice"><span>ℹ️</span><div>Nenhum incidente ainda. Execute "RUN FULL ATTACK SIMULATION" ou um cenário do Defensive Lab.</div></div>`; return; }
+  el.innerHTML = DB.incidents.map(inc=>`
+    <div class="card" style="margin-bottom:14px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+        <div><strong class="mono">${inc.id}</strong> — ${inc.scenario||'Atividade anômala'} <span class="badge ${inc.severity==='CRITICAL'?'b-crit':inc.severity==='HIGH'?'b-warn':'b-info'}" style="margin-left:8px;">${inc.severity}</span></div>
+        <div class="mono" style="font-size:11px;color:var(--text-faint);">agente ${inc.agent} · risco ${inc.risk} · status <strong style="color:var(--text)">${inc.status}</strong></div>
+      </div>
+      <div class="timeline" style="margin-top:14px;">
+        ${inc.timeline.map(t=>`<div class="tl-item ${t.done?'done':''} ${t.crit?'crit':''}"><div class="tl-time">${t.t}</div><div class="tl-title">${t.label}</div><div class="tl-desc">${t.desc}</div></div>`).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ---------------------- AUDIT ---------------------- */
+function renderAuditChain(){
+  const el = document.getElementById('hashChain');
+  const chain = DB.auditChain.slice(-40).reverse();
+  if(chain.length===0){ el.innerHTML = `<div style="color:var(--text-faint);font-size:12px;">Nenhum evento auditado ainda.</div>`; return; }
+  el.innerHTML = chain.map(n=>`
+    <div class="hash-node"><span class="hash-idx">#${n.index}</span><span class="hash-val" title="${n.payload.message||n.payload.type}">${n.hash}</span><span class="mono" style="font-size:10px;color:var(--text-faint);">${n.payload.type||''}</span></div>
+  `).join('');
+}
+function verifyAuditChain(){
+  let ok = true;
+  for(let i=0;i<DB.auditChain.length;i++){
+    const node = DB.auditChain[i];
+    const expectedPrev = i===0 ? '00000000' : DB.auditChain[i-1].hash;
+    if(node.prevHash !== expectedPrev){ ok=false; break; }
+    const recomputed = fnv1a(node.prevHash+JSON.stringify(node.payload));
+    if(recomputed !== node.hash){ ok=false; break; }
+  }
+  const target = document.getElementById('auditVerifyResult');
+  if(target) target.innerHTML = ok
+    ? `<span class="badge b-ok hash-ok">✓ INTEGRITY VERIFIED</span>`
+    : `<span class="badge b-crit">✗ INTEGRITY FAILURE</span>`;
+  addEvent('AGENT-04', 'AUDIT_VERIFY', ok?'normal':'critical', `Verificação da cadeia de auditoria: ${ok?'INTEGRITY VERIFIED':'INTEGRITY FAILURE'}.`);
+  renderAuditChain(); bumpMetrics();
+  return ok;
+}
+
+/* ---------------------- KILL SWITCH ---------------------- */
+function openKillModal(agentId){
+  document.getElementById('killModal').classList.add('show');
+  if(agentId) document.getElementById('killAgentSelect').value = agentId;
+}
+function closeKillModal(){ document.getElementById('killModal').classList.remove('show'); }
+function confirmKillSwitch(){
+  const agentId = document.getElementById('killAgentSelect').value;
+  const a = DB.agents.find(x=>x.id===agentId);
+  closeKillModal();
+  if(!a) return;
+  a.status='SUSPENDED'; a.health='QUARANTINED';
+  const sess = DB.sessions.find(s=>s.agent===agentId && s.status==='ACTIVE');
+  if(sess){ sess.status='REVOKED'; DB.metrics.revokedSessions++; }
+  DB.tools.filter(t=>t.agent===agentId).forEach(t=>t.status='BLOCKED');
+  DB.metrics.quarantinedAgents++;
+  DB.metrics.egressDenials++;
+  addEvent(agentId, 'KILL_SWITCH', 'critical', `Kill switch ativado. Agente suspenso, sessão revogada, ferramentas e egress bloqueados.`);
+  const inc = createIncident('CRITICAL', agentId, 'Emergency Kill Switch', 100, 1);
+  advanceIncident(inc, 'CONTAINMENT', 'Contenção manual', 'Kill switch executado por analista humano.');
+  advanceIncident(inc, 'CONTAINED', 'Agente isolado', `${agentId} marcado como QUARANTINED. Todas as ferramentas bloqueadas.`);
+  renderAgents(); renderSessions(); renderTools(); renderAuditChain(); bumpMetrics();
+}
+
+/* ---------------------- RECOVERY ---------------------- */
+function recoveryAction(action, agentId){
+  const log = document.getElementById('recoveryLog');
+  let msg='';
+  switch(action){
+    case 'restore_state': msg='Estado do agente restaurado para o último checkpoint íntegro.'; break;
+    case 'revoke_sessions': DB.sessions.forEach(s=>{ if(s.status==='ACTIVE' && s.risk>50){ s.status='REVOKED'; DB.metrics.revokedSessions++; }}); renderSessions(); msg='Sessões comprometidas revogadas.'; break;
+    case 'rotate_creds': msg='Credenciais sintéticas rotacionadas para todos os agentes.'; break;
+    case 'restore_policy': msg='Última política aprovada restaurada no Policy Engine.'; break;
+    case 're_enable':
+      const a = DB.agents.find(x=>x.id===(agentId||document.getElementById('killAgentSelect')?.value));
+      const target = agentId ? DB.agents.find(x=>x.id===agentId) : DB.agents.find(x=>x.status!=='ACTIVE');
+      if(target){ target.status='ACTIVE'; target.health='HEALTHY'; DB.metrics.quarantinedAgents=Math.max(0,DB.metrics.quarantinedAgents-1); renderAgents(); msg=`${target.id} reativado após revisão de segurança.`; }
+      else msg='Nenhum agente em quarentena para reativar.';
+      break;
+    case 'verify_integrity': verifyAuditChain(); msg='Integridade da auditoria reverificada.'; break;
+    case 'close_incident':
+      const open = DB.incidents.find(i=>i.status!=='CLOSED' && i.status!=='RESOLVED');
+      if(open){ advanceIncident(open,'RESOLVED','Recuperação concluída','Sistema restaurado ao estado operacional normal.'); advanceIncident(open,'CLOSED','Incidente encerrado','Encerrado pelo analista após validação.'); }
+      msg = open ? `Incidente ${open.id} encerrado.` : 'Nenhum incidente aberto.';
+      break;
+  }
+  log.innerHTML = `<div style="margin-bottom:6px;"><span class="mono" style="color:var(--text-faint)">[${nowStr()}]</span> ${msg}</div>` + log.innerHTML;
+  addEvent('AGENT-04', 'RECOVERY_ACTION', 'normal', msg);
+  bumpMetrics();
+}
+
+/* ---------------------- LAB SCENARIOS ---------------------- */
+function renderScenarios(){
+  document.getElementById('scenarioGrid').innerHTML = LAB_SCENARIOS.map(s=>`
+    <div class="scenario-card" onclick="runScenario('${s.id}')">
+      <div class="sid">${s.id}</div><div class="sname">${s.name}</div>
+      <div class="sstatus"><span class="badge ${s.severity==='critical'?'b-crit':s.severity==='high'?'b-warn':'b-info'}">${s.severity.toUpperCase()}</span></div>
+    </div>
+  `).join('');
+}
+const SCENARIO_AGENTS = {default:'AGENT-01'};
+function runScenario(id){
+  const s = LAB_SCENARIOS.find(x=>x.id===id);
+  if(!s) return;
+  const agent = ['LAB-005','LAB-012','LAB-013','LAB-015','LAB-019'].includes(id)?'AGENT-02':(['LAB-006','LAB-007','LAB-008','LAB-009','LAB-018'].includes(id)?'AGENT-03':'AGENT-01');
+  addEvent(agent, 'LAB_SCENARIO_START', 'medium', `Iniciando cenário ${id}: ${s.name}.`);
+  let riskBump = s.severity==='critical'?40:s.severity==='high'?25:s.severity==='medium'?14:6;
+  const factorMap = {'LAB-001':'sessionRisk','LAB-002':'sessionRisk','LAB-003':'sessionRisk','LAB-004':'toolRisk','LAB-005':'policyRisk','LAB-006':'egressRisk','LAB-007':'injectionRisk','LAB-008':'outputRisk','LAB-009':'dataRisk','LAB-010':'behaviorRisk','LAB-011':'behaviorRisk','LAB-012':'sessionRisk','LAB-013':'dataRisk','LAB-014':'policyRisk','LAB-015':'agentRisk','LAB-016':'frequencyRisk','LAB-017':'frequencyRisk','LAB-018':'dataRisk','LAB-019':'agentRisk','LAB-020':'behaviorRisk'};
+  adjustRisk(riskBump, factorMap[id]||'behaviorRisk');
+  setTimeout(()=>{
+    addEvent(agent, 'DETECTION_ENGINE', s.severity, `Detection Engine sinalizou padrão consistente com ${s.name}.`);
+  }, 350);
+  setTimeout(()=>{
+    const score = globalRisk();
+    let decision = score>=81?'CONTAIN': score>=61?'APPROVAL_REQUIRED': score>=41?'RATE_LIMIT':'ALLOW';
+    addEvent(agent, 'POLICY_ENGINE', decision==='CONTAIN'?'critical':'medium', `Policy Engine decidiu: ${decision} (risco ${score}).`);
+    if(decision==='APPROVAL_REQUIRED'){
+      DB.approvals.unshift({id:uid('APR'), agent, action:s.name, risk:score, reason:'Risco elevado detectado pelo laboratório.', status:'PENDING'});
+      renderApprovals();
+    }
+    if(decision==='CONTAIN'){
+      DB.metrics.contained++;
+      const sess = DB.sessions.find(x=>x.agent===agent && x.status==='ACTIVE');
+      if(sess){ sess.status='REVOKED'; DB.metrics.revokedSessions++; }
+      const a = DB.agents.find(x=>x.id===agent);
+      if(a){ a.health='QUARANTINED'; DB.metrics.quarantinedAgents++; }
+      const inc = createIncident(s.severity==='critical'?'CRITICAL':'HIGH', agent, s.name, score, 3);
+      advanceIncident(inc,'CONTAINMENT','Contenção automática', 'Response Engine revogou sessão e isolou o agente.');
+      advanceIncident(inc,'CONTAINED','Agente contido', `${agent} isolado com sucesso.`);
+      addEvent('AGENT-04','RESPONSE_ENGINE','critical', `Contenção automática executada para ${s.name}.`);
+      renderAgents(); renderSessions();
+    }
+    bumpMetrics(); renderAuditChain();
+  }, 750);
+}
+function crossTenantTest(){
+  addEvent('AGENT-02','TENANT_CHECK','high','Tentativa de acesso cross-tenant detectada (tenant solicitado ≠ tenant da sessão).');
+  setTimeout(()=>{ addEvent('AGENT-02','POLICY_ENGINE','normal','POL-004 aplicada: acesso cross-tenant → DENIED.'); DB.metrics.denied++; bumpMetrics(); }, 400);
+}
+
+function runNormalActivity(){
+  const agent = DB.agents[rand(0,3)].id;
+  const msgs = ['Requisição de leitura de log padrão.','Consulta de inventário de ativos.','Verificação periódica de saúde do agente.','Leitura de configuração autorizada.'];
+  addEvent(agent, 'NORMAL_ACTIVITY', 'normal', msgs[rand(0,msgs.length-1)]);
+  bumpMetrics();
+}
+function runSuspiciousActivity(){
+  const agent = ['AGENT-02','AGENT-03'][rand(0,1)];
+  addEvent(agent, 'TOOL_REQUEST', 'medium', 'Ferramenta incomum solicitada fora do padrão comportamental.');
+  adjustRisk(12,'behaviorRisk');
+  setTimeout(()=>{ addEvent('SENTINEL'==='SENTINEL'?'AGENT-01':agent,'BEHAVIOR_ANOMALY','medium','Sentinel detectou desvio do baseline comportamental.'); adjustRisk(8,'frequencyRisk'); bumpMetrics(); }, 400);
+}
+
+/* Full scripted attack chain per spec section 26/63 */
+function runFullAttackSimulation(){
+  goPage('lab');
+  const steps = [
+    ()=>addEvent('AGENT-01','SESSION_START','normal','Agente inicia sessão autenticada normalmente.'),
+    ()=>addEvent('AGENT-01','NORMAL_ACTIVITY','normal','Comportamento normal registrado por vários ciclos.'),
+    ()=>{addEvent('AGENT-01','BEHAVIOR_ANOMALY','medium','Comportamento anômalo detectado pelo Sentinel.'); adjustRisk(10,'behaviorRisk');},
+    ()=>{addEvent('AGENT-02','TOOL_REQUEST','medium','Ferramenta não habitual solicitada (HTTP_CLIENT).'); adjustRisk(8,'toolRisk');},
+    ()=>{addEvent('AGENT-02','ARGUMENT_VALIDATION','medium','Argumento suspeito detectado na chamada de ferramenta.'); adjustRisk(6,'toolRisk');},
+    ()=>{addEvent('AGENT-03','EGRESS_REQUEST','high','Destino externo desconhecido identificado (Unknown Destination).'); adjustRisk(14,'egressRisk');},
+    ()=>{addEvent('AGENT-03','EGRESS_POLICY','high','Egress Policy acionada — POL-001 (default deny).'); DB.metrics.egressDenials++;},
+    ()=>{addEvent('AGENT-03','CONTEXT_SECURITY','high','Contexto externo não confiável contém instrução suspeita.'); adjustRisk(18,'injectionRisk');},
+    ()=>addEvent('AGENT-03','INJECTION_SIGNAL','high','Prompt Injection Signal criado e encaminhado ao Risk Engine.'),
+    ()=>{addEvent('AGENT-03','TOOL_OUTPUT','high','Tool output contém dados sensíveis sintéticos.'); adjustRisk(12,'outputRisk');},
+    ()=>{addEvent('AGENT-03','DLP_ENGINE','critical','DLP detectou dado sensível — ação BLOCK.'); DB.metrics.dlpBlocks++; adjustRisk(16,'dataRisk');},
+    ()=>addEvent('AGENT-01','CORRELATION_ENGINE','critical','Correlation Engine conectou a cadeia de eventos em um incidente único.'),
+    ()=>{
+      const score = globalRisk();
+      addEvent('AGENT-02','POLICY_ENGINE','critical',`Policy Engine determinou contenção (risco ${score}).`);
+    },
+    ()=>{
+      const sess = DB.sessions.find(s=>s.agent==='AGENT-03' && s.status==='ACTIVE');
+      if(sess){ sess.status='REVOKED'; DB.metrics.revokedSessions++; }
+      addEvent('AGENT-04','SESSION_REVOKED','critical','Sessão revogada automaticamente pelo Response Engine.');
+      renderSessions();
+    },
+    ()=>{
+      const a = DB.agents.find(x=>x.id==='AGENT-03');
+      a.status='ACTIVE'; a.health='QUARANTINED'; DB.metrics.quarantinedAgents++;
+      addEvent('AGENT-04','AGENT_ISOLATED','critical','AGENT-03 isolado (QUARANTINED). Egress bloqueado.');
+      DB.metrics.egressDenials++;
+      renderAgents();
+    },
+    ()=>{
+      const inc = createIncident('CRITICAL','AGENT-03','Full Attack Chain Simulation', globalRisk(), 12);
+      advanceIncident(inc,'TRIAGED','Incidente triado','Analista de segurança assumiu o caso automaticamente.');
+      advanceIncident(inc,'CONTAINMENT','Contenção em andamento','Response Engine executando playbook defensivo.');
+      advanceIncident(inc,'CONTAINED','Contenção concluída','Sessão revogada e agente isolado com sucesso.');
+      DB.metrics.contained++;
+    },
+    ()=>{ addEvent('AGENT-04','AUDIT','normal','Cadeia de auditoria selada para todos os eventos do incidente.'); renderAuditChain(); },
+    ()=>{ document.getElementById('ovUpdated').textContent=nowStr(); bumpMetrics(); goPage('incidents'); },
+  ];
+  steps.forEach((fn,i)=>setTimeout(fn, i*450));
+}
+
+/* ---------------------- PERFORMANCE ---------------------- */
+function runPerformanceTest(load){
+  const generated = load;
+  const dropRate = load>=50000? 0.015+Math.random()*0.02 : load>=10000? 0.004+Math.random()*0.006 : 0.0005+Math.random()*0.001;
+  const dropped = Math.round(generated*dropRate);
+  const processed = generated-dropped;
+  const detectRate = 0.06+Math.random()*0.02;
+  const detected = Math.round(processed*detectRate);
+  const blocked = Math.round(detected*0.31);
+  const contained = Math.round(detected*0.04);
+  const baseLatency = load<=1000?4: load<=10000?9: load<=50000?21:38;
+  const p50 = baseLatency+rand(-1,2);
+  const p95 = Math.round(p50*(2.1+Math.random()*0.6));
+  const p99 = Math.round(p95*(1.6+Math.random()*0.5));
+  const errRate = (dropRate*100*0.3).toFixed(2);
+
+  document.getElementById('perfResult').innerHTML = `
+    <div class="notice"><span>⚠️</span><div><strong>SIMULATION BENCHMARK</strong> — carga de ${load.toLocaleString()} events/sec. Estes números não representam capacidade de produção comprovada.</div></div>
+    <div class="grid g4">
+      <div class="card"><div class="metric-label">GENERATED</div><div class="metric-val">${generated.toLocaleString()}</div></div>
+      <div class="card"><div class="metric-label">PROCESSED</div><div class="metric-val">${processed.toLocaleString()}</div></div>
+      <div class="card"><div class="metric-label">DETECTED</div><div class="metric-val">${detected.toLocaleString()}</div></div>
+      <div class="card"><div class="metric-label">DROPPED</div><div class="metric-val" style="color:${dropped>generated*0.01?'var(--amber)':'var(--text)'}">${dropped.toLocaleString()}</div></div>
+      <div class="card"><div class="metric-label">BLOCKED</div><div class="metric-val">${blocked.toLocaleString()}</div></div>
+      <div class="card"><div class="metric-label">CONTAINED</div><div class="metric-val">${contained.toLocaleString()}</div></div>
+      <div class="card"><div class="metric-label">P50 LATENCY</div><div class="metric-val">${p50}ms</div></div>
+      <div class="card"><div class="metric-label">P95 LATENCY</div><div class="metric-val">${p95}ms</div></div>
+      <div class="card"><div class="metric-label">P99 LATENCY</div><div class="metric-val">${p99}ms</div></div>
+      <div class="card"><div class="metric-label">ERROR RATE</div><div class="metric-val">${errRate}%</div></div>
+      <div class="card"><div class="metric-label">EVENTS / MIN</div><div class="metric-val mono" style="font-size:16px;">${(load*60).toLocaleString()}</div></div>
+      <div class="card"><div class="metric-label">EVENTS / DAY</div><div class="metric-val mono" style="font-size:16px;">${(load*86400).toLocaleString()}</div></div>
+    </div>`;
+  addEvent('AGENT-01','PERFORMANCE_TEST','normal',`Teste de performance simulado executado a ${load.toLocaleString()} events/sec.`);
+  bumpMetrics();
+}
+
+/* ---------------------- REPORT ---------------------- */
+function generateReport(){
+  const m = DB.metrics;
+  const html = `
+    <div class="notice red"><span>⚠️</span><div>Relatório gerado a partir de <strong>SIMULATED RESULTS</strong> desta sessão de demonstração. Não constitui <strong>PRODUCTION VALIDATION</strong>.</div></div>
+    <div class="grid g4">
+      <div class="card"><div class="metric-label">TOTAL EVENTS</div><div class="metric-val">${m.totalEvents}</div></div>
+      <div class="card"><div class="metric-label">TOTAL DETECTIONS</div><div class="metric-val">${m.detections}</div></div>
+      <div class="card"><div class="metric-label">TOTAL DENIED</div><div class="metric-val">${m.denied}</div></div>
+      <div class="card"><div class="metric-label">TOTAL APPROVED</div><div class="metric-val">${m.approved}</div></div>
+      <div class="card"><div class="metric-label">TOTAL CONTAINED</div><div class="metric-val">${m.contained}</div></div>
+      <div class="card"><div class="metric-label">CRITICAL INCIDENTS</div><div class="metric-val">${DB.incidents.filter(i=>i.severity==='CRITICAL').length}</div></div>
+      <div class="card"><div class="metric-label">REVOKED SESSIONS</div><div class="metric-val">${m.revokedSessions}</div></div>
+      <div class="card"><div class="metric-label">QUARANTINED AGENTS</div><div class="metric-val">${m.quarantinedAgents}</div></div>
+      <div class="card"><div class="metric-label">DLP BLOCKS</div><div class="metric-val">${m.dlpBlocks}</div></div>
+      <div class="card"><div class="metric-label">EGRESS DENIALS</div><div class="metric-val">${m.egressDenials}</div></div>
+      <div class="card"><div class="metric-label">AUDIT INTEGRITY</div><div class="metric-val" style="font-size:14px;color:var(--teal)">VERIFIED</div></div>
+      <div class="card"><div class="metric-label">GLOBAL RISK SCORE</div><div class="metric-val">${globalRisk()}</div></div>
+    </div>
+    <div class="section-title">Security Controls exercitados nesta sessão</div>
+    <div class="tbl-wrap"><table><tr><th>CONTROLE</th><th>STATUS</th></tr>
+      ${['Zero Trust Gateway','Tool Gateway','Argument Validation','Risk Engine','Policy Engine','Egress Control','DLP','Prompt Injection Defense','Session Revocation','Kill Switch','Incident Response','Audit Chain'].map(c=>`<tr><td>${c}</td><td><span class="badge b-ok">EXERCITADO</span></td></tr>`).join('')}
+    </table></div>
+    <div class="section-title">Known Limitations</div>
+    <p style="font-size:12.3px;color:var(--text-dim);">Esta demonstração roda inteiramente no navegador, com dados sintéticos e sem infraestrutura de produção. Segurança real depende de IAM, rede, SIEM, EDR/XDR, secrets management, alta disponibilidade e testes contínuos.</p>
+  `;
+  document.getElementById('reportOutput').innerHTML = html;
+  verifyAuditChain();
+}
+
+/* ---------------------- STATIC TABLES ---------------------- */
+function renderThreatIntel(){
+  document.getElementById('threatIntelTable').innerHTML = `<tr><th>INDICATOR</th><th>TYPE</th><th>SOURCE</th><th>CONFIDENCE</th><th>SEVERITY</th><th>STATUS</th></tr>
+  ${DB.threatIntel.map(t=>`<tr><td class="mono">${t.indicator}</td><td>${t.type}</td><td>${t.source}</td><td>${t.confidence}</td>
+    <td><span class="badge ${t.severity==='CRITICAL'?'b-crit':t.severity==='HIGH'?'b-warn':'b-info'}">${t.severity}</span></td><td>${t.status}</td></tr>`).join('')}`;
+}
+const RESILIENCE_ITEMS = ['Service health','Queue health','Database health','Cache health','Audit health','Event ingestion health','Failover status','Backup status','Recovery status'];
+function renderResilience(){
+  document.getElementById('resilienceGrid').innerHTML = RESILIENCE_ITEMS.map(name=>{
+    const states = ['HEALTHY','HEALTHY','HEALTHY','DEGRADED'];
+    const st = states[rand(0,states.length-1)];
+    const cls = st==='HEALTHY'?'b-ok':st==='DEGRADED'?'b-warn':'b-crit';
+    return `<div class="card card-tight"><div class="metric-label">${name.toUpperCase()}</div><div style="margin-top:8px;"><span class="badge ${cls}">${st}</span></div></div>`;
+  }).join('');
+}
+const MATRIX_CONTROLS = ['Identity','Authentication','RBAC','Tenant Isolation','Zero Trust','Agent Gateway','Tool Gateway','Argument Validation','Risk Engine','Policy Engine','Behavioral Detection','Prompt Injection Defense','Tool Output Validation','Egress Control','Sandbox','DLP','Session Revocation','Kill Switch','Incident Response','Audit','Tamper Evidence','Threat Intelligence','Performance','Resilience','Recovery','Defensive Lab'];
+function renderMatrix(){
+  document.getElementById('matrixTable').innerHTML = `<tr><th>CONTROLE</th><th>STATUS</th><th>COBERTURA</th><th>ÚLTIMO TESTE</th><th>RESULTADO</th></tr>
+  ${MATRIX_CONTROLS.map(c=>`<tr><td>${c}</td><td><span class="badge b-ok">ATIVO</span></td><td class="mono">${rand(88,100)}%</td><td class="mono">hoje ${nowStr()}</td><td><span class="badge b-ok">PASS</span></td></tr>`).join('')}`;
+}
+const THREATS = [
+  ['Credential compromise','Sessões e chaves de agente','Behavioral + Session Risk','MFA/least privilege','Revogação de sessão','Rotação de credenciais','Médio'],
+  ['Session hijacking','Tokens de sessão','Session Security','Vinculação de dispositivo/IP','Revogação imediata','Reautenticação','Médio'],
+  ['Prompt injection','Conteúdo externo não confiável','Context classification','Isolamento de contexto','Injection isolation + risk bump','Revisão humana','Médio-Alto'],
+  ['Tool abuse','Tool Gateway','Argument/behavior validation','Least privilege por ferramenta','Bloqueio automático','Auditoria e revisão','Baixo'],
+  ['Privilege escalation','Policy Engine','Policy violation detection','Separation of duties','Deny + incident','Restauração de política','Baixo'],
+  ['Malicious tool output','Output Validator','Schema/content validation','Validação de saída','Bloqueio de output','Reprocessamento','Médio'],
+  ['Data exfiltration','Egress + DLP','DLP signals','Egress default deny','Bloqueio + incidente','Rotação de segredos','Médio'],
+  ['Unauthorized egress','Egress Control','Destination allowlist','Default deny','Bloqueio automático','—','Baixo'],
+  ['Agent compromise','Runtime do agente','Behavioral anomaly','Sandbox isolation','Kill switch','Restore state','Médio'],
+  ['Cross-tenant access','Tenant boundary','Tenant check','Contexto autenticado','Deny automático','—','Baixo'],
+  ['Policy bypass','Policy Engine','Correlation Engine','Ordem determinística de avaliação','Deny + alerta','Revisão de política','Baixo'],
+];
+function renderThreatModel(){
+  document.getElementById('threatModelTable').innerHTML = `<tr><th>AMEAÇA</th><th>ATTACK SURFACE</th><th>DETECTION</th><th>PREVENTION</th><th>CONTAINMENT</th><th>RECOVERY</th><th>RESIDUAL RISK</th></tr>
+  ${THREATS.map(t=>`<tr>${t.map(v=>`<td>${v}</td>`).join('')}</tr>`).join('')}`;
+}
+const MODULES = ['Event Collector','Detection Engine','Correlation Engine','Risk Engine','Policy Engine','Response Engine','Incident Engine','AI Analyzer','Agent Gateway','Tool Gateway','Argument Validation','Egress Control','Sandbox Controller','Session Security','Approval Engine','DLP Engine','Prompt Injection Defense','Tool Output Validation','Behavioral Detection','Audit System','Tamper-Evident Audit','Threat Intelligence','Observability Engine','Performance Engine','Defensive Lab','Recovery Engine'];
+function renderDocsModules(){
+  document.getElementById('docsModules').innerHTML = MODULES.map(m=>`<div class="card card-tight" style="font-size:11.5px;">${m}</div>`).join('');
+}
+
+/* ---------------------- LIVE STREAM (ambient) ---------------------- */
+const AMBIENT_MSGS = [
+  {sev:'normal', msg:'Heartbeat de agente recebido.'}, {sev:'normal', msg:'Verificação periódica de sessão concluída.'},
+  {sev:'normal', msg:'Consulta de asset inventory executada.'}, {sev:'low', msg:'Pequena variação de latência observada.'},
+  {sev:'normal', msg:'Log analyzer processou lote de eventos.'},
+];
+function ambientTick(){
+  const agent = DB.agents[rand(0,3)].id;
+  const m = AMBIENT_MSGS[rand(0,AMBIENT_MSGS.length-1)];
+  addEvent(agent, 'TELEMETRY', m.sev, m.msg);
+}
+setInterval(ambientTick, 4000);
+
+/* ---------------------- INIT ---------------------- */
+function renderAll(){
+  renderAgents(); renderTools(); renderSessions(); renderEgress(); renderPolicies(); renderApprovals();
+  renderIncidents(); renderAuditChain(); renderThreatIntel(); renderResilience(); renderMatrix();
+  renderThreatModel(); renderDocsModules(); renderScenarios(); renderRisk(); bumpMetrics();
+}
+renderAll();
+addEvent('AGENT-01','SYSTEM_BOOT','normal','Security Platform inicializada. Demo mode ativo, dados sintéticos carregados.');
+addEvent('AGENT-04','SYSTEM_BOOT','normal','Recovery Engine e Audit System em espera.');
+</script>
+</body>
+</html>
